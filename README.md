@@ -6,23 +6,22 @@ An autonomous multi-agent software development framework for GitHub Copilot. Spe
 
 ### 1. Install into Your Project
 
-Copy or symlink these directories into your project:
-
 ```bash
 # Clone the framework
 git clone <repo-url> dev-team-framework
 
-# Copy into your project
-cp -r dev-team-framework/.github/agents/ your-project/.github/agents/
-cp -r dev-team-framework/.team/ your-project/.team/
-cp dev-team-framework/AGENTS.md your-project/AGENTS.md
-cp dev-team-framework/.mcp.json your-project/.mcp.json
+# Bootstrap into an existing repo
+./dev-team-framework/bootstrap.sh /path/to/your-project
+
+# Or bootstrap a new repo
+./dev-team-framework/bootstrap.sh /path/to/new-project --init-git
 ```
 
-Or add as a git submodule:
-```bash
-git submodule add <repo-url> .dev-team
-```
+The bootstrap script:
+- Copies agents, protocols, org chart, and config into the target
+- Detects existing files and skips them (use `--force` to overwrite)
+- Is idempotent — safe to re-run after framework updates
+- Optionally initializes a git repo with `--init-git`
 
 ### 2. Bootstrap Your Team
 
