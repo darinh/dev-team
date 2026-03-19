@@ -1,0 +1,76 @@
+# Dev-Team Organizational Structure
+#
+# This file defines the team hierarchy, agent roles, and organizational relationships.
+# All agents read this file to discover who to collaborate with.
+#
+# Maintained by: hiring-manager (sole writer)
+# Queryable by: operator (can read and report on this structure)
+# Readable by: all agents
+#
+# Schema:
+#   team.name          - Team name
+#   team.operator      - The operator agent (truth-only query interface)
+#   team.hiring_manager - The hiring manager agent (team builder)
+#   team.agents[]      - Flat list of all agents with metadata
+#   team.divisions[]   - Organizational groupings (created when needed)
+#   team.v_teams[]     - Cross-functional virtual teams (formed organically)
+
+team:
+  name: "Dev Team"
+  version: 1
+
+  # Core agents (always present)
+  operator: "operator"
+  hiring_manager: "hiring-manager"
+
+  # All agents in the team
+  # Each agent entry contains:
+  #   name:        Agent file name (without .agent.md)
+  #   role:        Human-readable role title
+  #   domain:      Primary expertise domain
+  #   reports_to:  Manager agent name (or "hiring-manager" if no manager)
+  #   status:      active | inactive | deprecated
+  #   created:     ISO date when the agent was created
+  #   skills:      List of key skills/competencies
+  agents:
+    - name: "operator"
+      role: "Operator"
+      domain: "Team operations and state queries"
+      reports_to: null  # Operator reports to no one — it serves the user
+      status: active
+      created: "2026-03-19"
+      skills:
+        - "Cross-agent state queries"
+        - "Memory search and aggregation"
+        - "Org chart navigation"
+        - "Truth-verified reporting"
+
+    - name: "hiring-manager"
+      role: "Hiring Manager"
+      domain: "Agent creation, team structure, skill marketplace"
+      reports_to: null  # Hiring Manager reports to the user
+      status: active
+      created: "2026-03-19"
+      skills:
+        - "Agent design and creation"
+        - "Organizational structure management"
+        - "Skill gap analysis"
+        - "Adversarial review coordination"
+        - "Workforce planning"
+
+  # Organizational divisions (created by Hiring Manager when team grows)
+  # Each division has:
+  #   name:       Division name
+  #   manager:    Manager agent name
+  #   members:    List of agent names in this division
+  #   focus:      What this division is responsible for
+  divisions: []
+
+  # Cross-functional virtual teams (formed and dissolved as needed)
+  # Each v-team has:
+  #   name:       V-team name
+  #   purpose:    What this v-team is working on
+  #   lead:       Agent leading the v-team
+  #   members:    List of agent names
+  #   status:     active | completed | dissolved
+  v_teams: []
