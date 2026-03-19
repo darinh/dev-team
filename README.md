@@ -23,7 +23,22 @@ The bootstrap script:
 - Is idempotent — safe to re-run after framework updates
 - Optionally initializes a git repo with `--init-git`
 
-### 2. Bootstrap Your Team
+### 2. Start a New Project
+
+Brainstorm with the Project Manager — your primary point of contact:
+
+```
+@project-manager I want to build a task management app with a REST API and React frontend.
+```
+
+The Project Manager will:
+1. Ask probing questions to understand your vision
+2. Write a project brief with features, personas, and constraints
+3. Instruct the Hiring Manager to build a team tailored to your stack
+4. Bring in specialists for design consultations
+5. Create a phased project plan with acceptance criteria
+
+### 3. Work with Your Team
 
 Open your project in VS Code with GitHub Copilot, then invoke the Hiring Manager:
 
@@ -40,7 +55,7 @@ The Hiring Manager will:
 
 ### 3. Start Working
 
-Once your team is built, invoke specialists directly:
+Once your team is built, invoke specialists directly or let the Project Manager coordinate:
 
 ```
 @api-architect Design the REST API for user management
@@ -103,11 +118,14 @@ Agents communicate by spawning each other via the `task` tool with complete cont
 
 ## Built-in Agents
 
+### Project Manager (`@project-manager`)
+Your primary collaborator. Start here when you have an idea or a new project. The PM brainstorms with you, gathers requirements, writes project briefs, brings in specialists for design consultations, and coordinates the team to deliver.
+
 ### Operator (`@operator`)
 The team's omniscient, truth-only query interface. Ask it anything about team state, agent knowledge, project context, or session history. It will answer with cited evidence or tell you it doesn't know.
 
 ### Hiring Manager (`@hiring-manager`)
-The team builder. Analyzes your project, creates specialist agents, maintains the org chart, and manages the skill marketplace. Every new agent passes adversarial review before joining.
+The team builder. Analyzes your project, creates specialist agents, maintains the org chart, and manages the skill marketplace. Can also onboard external agents — installing them, adapting them to team protocols, and interviewing them to ensure they integrate correctly.
 
 ## Protocols
 

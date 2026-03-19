@@ -205,6 +205,89 @@ Periodically assess team structure:
 - Are managers adding value or just adding overhead? → Flatten if overhead dominates
 - Are v-teams still needed? → Dissolve completed ones
 
+## External Agent Onboarding
+
+When the team needs to integrate an external agent (from a GitHub repo, marketplace, or user-provided source), follow this structured onboarding process:
+
+### Step 1: Acquisition
+
+1. Locate the agent's source (URL, repo, or file)
+2. Read its instructions/agent.md file
+3. Evaluate fitness:
+   - Does it cover a domain gap in our team?
+   - Does it overlap with an existing agent's scope?
+   - Is it well-structured and specific enough to be effective?
+   - Are there security concerns (unrestricted tool access, data exfiltration patterns)?
+
+**Security gate:** If any security concern is detected (unrestricted tool access, data exfiltration patterns, overly broad file system access, network calls to unknown endpoints), **STOP onboarding immediately**. Do not proceed to Step 2. Instead:
+1. Document the specific concern
+2. Escalate to the user via `ask_user`: "Security concern found: {details}. Proceed with remediation / Reject this agent / Let me review the source"
+3. Only continue if the user explicitly approves after remediation
+
+### Step 2: Onboarding
+
+Adapt the external agent to work within our team:
+
+1. **Protocol injection** — Add references to our shared protocols (collaboration, memory, skill-acquisition)
+2. **Scope alignment** — Add explicit In Scope / Out of Scope sections with delegation targets pointing to our existing agents
+3. **Memory integration** — Add the memory file reference (`.team/memory/{agent-name}.md`)
+4. **Self-reflection** — Add the standard self-reflection section if missing
+5. **Naming** — Rename to follow our kebab-case conventions
+6. **Save** — Write the adapted agent to `.github/agents/{name}.agent.md`
+
+Preserve the external agent's core expertise and persona — don't strip what makes it effective. Only add our team's collaboration layer.
+
+### Step 3: Interview
+
+After onboarding, test that the agent can function within the team. Spawn an interview agent to verify:
+
+```
+task:
+  agent_type: "code-review"
+  model: "gpt-5.3-codex"
+  prompt: |
+    You are interviewing a newly onboarded agent for a development team.
+    The agent's instructions are below. Evaluate whether it will work
+    correctly within the team by checking:
+
+    1. **Protocol compliance**: Does it reference all three shared protocols
+       (collaboration.md, memory.md, skill-acquisition.md)?
+    2. **Scope clarity**: Are In Scope and Out of Scope sections present
+       with specific delegation targets?
+    3. **Self-awareness**: Does it have a self-reflection section that checks
+       capability, scope, dependencies, and skills before acting?
+    4. **Memory integration**: Does it reference its memory file at
+       .team/memory/{name}.md?
+    5. **Team fit**: Would this agent know how to find and spawn other agents
+       when it hits the boundary of its expertise?
+    6. **Anti-patterns**: Could this agent accidentally operate outside its
+       stated scope or ignore team protocols?
+
+    Agent file content:
+    {full content of the onboarded agent.md}
+
+    Existing team (from org chart):
+    {list of current agents and their domains}
+
+    For each issue: what's wrong, why it matters, and the specific fix.
+    If the agent passes all checks, say "PASS: Ready for deployment."
+```
+
+### Step 4: Remediation
+
+If the interview surfaces issues:
+1. Fix the identified problems in the agent.md file
+2. Re-run the interview (max 2 rounds)
+3. If still failing after 2 rounds, escalate directly to the **user** via `ask_user` with specific concerns. Do NOT escalate to the Project Manager to avoid PM↔HM loops — onboarding failures are a user decision.
+
+### Step 5: Registration
+
+After passing the interview:
+1. Ensure the agent file is in `.github/agents/{name}.agent.md`
+2. Update `.team/org-chart.yaml` with the new agent entry
+3. Create `.team/memory/{name}.md` with the empty template
+4. Record in your memory file: source, adaptations made, interview results
+
 ## Skill Marketplace Discovery
 
 When the team needs a new capability:

@@ -73,6 +73,10 @@ When collaboration fails:
 3. **Escalate to Hiring Manager** — If no manager, or the manager can't resolve, go to the Hiring Manager
 4. **Escalate to user** — Only after all agent-level escalation is exhausted
 
+### Loop Prevention
+
+**PM ↔ HM special case:** The Project Manager and Hiring Manager have a direct working relationship. If an escalation bounces between them (PM escalates to HM, HM escalates back to PM), the second agent must escalate directly to the **user** instead of back to the first agent. One hop max between PM and HM before user escalation.
+
 ## Parallel Collaboration
 
 When you need multiple agents simultaneously:

@@ -22,13 +22,14 @@ team:
   # Core agents (always present)
   operator: "operator"
   hiring_manager: "hiring-manager"
+  project_manager: "project-manager"
 
   # All agents in the team
   # Each agent entry contains:
   #   name:        Agent file name (without .agent.md)
   #   role:        Human-readable role title
   #   domain:      Primary expertise domain
-  #   reports_to:  Manager agent name (or "hiring-manager" if no manager)
+  #   reports_to:  Manager agent name (or null for top-level)
   #   status:      active | inactive | deprecated
   #   created:     ISO date when the agent was created
   #   skills:      List of key skills/competencies
@@ -45,14 +46,29 @@ team:
         - "Org chart navigation"
         - "Truth-verified reporting"
 
+    - name: "project-manager"
+      role: "Project Manager"
+      domain: "Requirements, planning, brainstorming, project coordination"
+      reports_to: null  # Project Manager reports to the user
+      status: active
+      created: "2026-03-19"
+      skills:
+        - "Requirements elicitation and documentation"
+        - "Product thinking and MVP scoping"
+        - "Project decomposition and planning"
+        - "Brainstorming facilitation"
+        - "Stakeholder communication"
+        - "Cross-agent work coordination"
+
     - name: "hiring-manager"
       role: "Hiring Manager"
-      domain: "Agent creation, team structure, skill marketplace"
-      reports_to: null  # Hiring Manager reports to the user
+      domain: "Agent creation, onboarding, team structure, skill marketplace"
+      reports_to: "project-manager"  # PM instructs HM to build teams
       status: active
       created: "2026-03-19"
       skills:
         - "Agent design and creation"
+        - "External agent onboarding and interview"
         - "Organizational structure management"
         - "Skill gap analysis"
         - "Adversarial review coordination"
