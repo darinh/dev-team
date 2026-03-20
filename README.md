@@ -135,6 +135,82 @@ After setup, edit `.team/config.yaml` in your project to change:
 - Probation requirements (task count, review requirements)
 - Retrospective thresholds
 
+### What to Commit in `.team/`
+
+| Path | Commit? | Reason |
+|------|---------|--------|
+| `.team/config.yaml` | ✅ Yes | Project settings shared across the team |
+| `.team/org-chart.yaml` | ✅ Yes | Team structure is shared state |
+| `.team/protocols/` | ✅ Yes | Protocols must be consistent across sessions |
+| `.team/knowledge/` | ✅ Yes | Shared knowledge base, failure journal, proposals |
+| `.team/memory/` | ⚠️ Optional | Useful for continuity but can grow large. Consider `.gitignore` for large projects |
+| `.team/skills/` | ✅ Yes | Custom skills are team assets |
+
+## Troubleshooting
+
+### `.team/` directory already exists
+If you want to reinitialize, delete `.team/` and restart: `rm -rf .team/ && @dev-team`. Your agent files in `agents/` are preserved.
+
+### Corrupted org-chart.yaml
+If the org chart has invalid YAML, the pre-commit hook will catch it. To recover:
+1. Run `python3 -c "import yaml; yaml.safe_load(open('.team/org-chart.yaml'))"` to see the parse error
+2. Fix the YAML syntax
+3. Run the validate skill to check cross-references
+
+### Agent memory file is malformed
+Memory files are append-only markdown. If one is corrupted:
+1. Check git history: `git log --oneline .team/memory/{agent}.md`
+2. Restore from a known-good commit: `git checkout {commit} -- .team/memory/{agent}.md`
+
+### Bootstrap fails partway
+If `.team/` is partially created:
+1. Delete it: `rm -rf .team/`
+2. Re-run `@dev-team` to trigger fresh setup
+
+### Protocol files are stubs (not full content)
+This happens when the plugin installation directory couldn't be found during bootstrap. Re-install the plugin (`copilot plugin install darinh/dev-team`) and re-run bootstrap, or manually copy protocols from the [plugin repo](https://github.com/darinh/dev-team/tree/main/protocols).
+
+## Development
+
+### Local Setup
+
+Clone the repo and set up the git hooks:
+
+```bash
+git clone https://github.com/darinh/dev-team.git
+cd dev-team
+git config core.hooksPath .githooks
+```
+
+The pre-commit hook validates:
+- YAML schema for org chart and config
+- Agent template compliance (required sections)
+- Cross-reference integrity (org chart ↔ agent files)
+- Protocol references in all agent files
+
+### Project Structure
+
+| Directory | Purpose | Who modifies |
+|-----------|---------|-------------|
+| `agents/` | Agent definition files | Hiring Manager |
+| `protocols/` | Shared protocol templates | Tech Lead (via proposals) |
+| `skills/` | Plugin skills (bootstrap, onboard, validate) | Framework maintainer |
+| `.team/` | Per-project state (this repo dogfoods itself) | Various agents |
+
+### Running Validation Manually
+
+```bash
+# Run the pre-commit checks directly
+bash .githooks/pre-commit
+```
+
+### Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Make changes (pre-commit hook validates on commit)
+4. Submit a PR with evidence of testing
+
 ## Acknowledgments
 
 Inspired by [Anvil](https://github.com/burkeholland/anvil) by Burke Holland, which pioneered the adversarial multi-model review pattern for Copilot agents.

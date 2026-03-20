@@ -48,7 +48,9 @@ See `.team/protocols/collaboration.md` for the full protocol. Summary:
 3. **Include acceptance criteria** — Tell the agent what "done" looks like
 4. **Handle the result** — Verify the output before incorporating it
 5. **Escalate if blocked** — If the spawned agent can't help, escalate to its manager or the Hiring Manager
-6. **Max depth: 3** — Never spawn an agent that spawns an agent that spawns an agent that spawns an agent. If you're at depth 3, solve the problem yourself or escalate to the user
+6. **Max depth: 3** — Never spawn an agent that spawns an agent that spawns an agent that spawns an agent. If you're at depth 3, solve the problem yourself or escalate to the user. Always include `Spawn depth: N` in spawn prompts, incrementing from what you received.
+
+> **Note on protocol paths**: Protocol references like `.team/protocols/collaboration.md` are relative to the project using the plugin. In projects, `.team/protocols/` contains copies created during bootstrap. The source of truth for protocol content lives in the plugin's `protocols/` directory. When working on the plugin itself, read from `protocols/` at the repo root.
 
 ## Skill Acquisition
 

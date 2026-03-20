@@ -58,6 +58,7 @@ for f in agents/*.agent.md; do
   grep -qi '## Scope' "$f"           || missing="$missing Scope"
   grep -qi '## Working Style' "$f"   || missing="$missing Working-Style"
   grep -qi '## Self-Reflection' "$f" || missing="$missing Self-Reflection"
+  grep -qi '## Protocols' "$f"       || missing="$missing Protocols"
 
   if [ -n "$missing" ]; then
     echo "  ❌ $name: missing:$missing"

@@ -6,6 +6,12 @@
 #
 # Edit this file to change behavior at any time.
 
+# Project info
+project:
+  name: "dev-team"
+  description: "Autonomous multi-agent software development framework plugin for GitHub Copilot"
+  stack: ["markdown", "yaml", "bash", "python"]
+
 # Upstream contribution settings
 # Controls how improvements discovered in this project flow back
 # to the framework repository.
@@ -31,7 +37,10 @@ upstream:
 
 # Agent probation settings
 probation:
-  # Number of real tasks before promotion to active
+  # Number of real tasks before promotion to active.
+  # A "task" is any request that produces a verifiable, committed output
+  # (code, documentation, or configuration change). Code reviews count.
+  # Brainstorming sessions and queries do not.
   required_tasks: 3
 
   # Whether Tech Lead review is required for promotion

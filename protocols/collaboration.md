@@ -41,6 +41,7 @@ prompt: |
 3. **Specify deliverables** — "Write the function" not "think about the function"
 4. **Include file paths** — Always reference specific files, not vague descriptions
 5. **State your depth** — Include `Spawn depth: N` so the target agent knows how deep the chain is
+6. **Increment depth** — If you received `Spawn depth: N` in your prompt, include `Spawn depth: N+1` in any agents you spawn. If N+1 > 3, do NOT spawn — solve it yourself or return to the caller.
 
 ## Spawn Depth Limit
 
@@ -54,6 +55,14 @@ At depth 3, the agent must:
 - Solve the problem itself if within its persona
 - Return to the calling agent with a clear explanation of what it cannot do
 - Never spawn another agent
+
+### Enforcement
+
+Spawn depth is self-enforced via the `Spawn depth: N` marker in every spawn prompt:
+1. The initiating agent (spawned by the user or @dev-team) sets `Spawn depth: 1`
+2. Each subsequent spawn increments: `Spawn depth: 2`, `Spawn depth: 3`
+3. At depth 3, the agent MUST NOT spawn. It solves the problem itself or returns with a clear explanation.
+4. If a spawn prompt arrives WITHOUT a depth marker, treat it as depth 1 (assume the user or entry point spawned you).
 
 ## Handling Results
 

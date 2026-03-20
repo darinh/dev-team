@@ -147,11 +147,13 @@ For each needed agent:
 
 Every new agent.md file must pass adversarial review before being added to the team.
 
+**Model selection**: Use two different models to get diverse review perspectives. Pick from whatever models are available in your environment. The key is using *different* models, not specific ones.
+
 Spawn 2 code-review agents in parallel with different models:
 
 ```
 agent_type: "code-review"
-model: "gpt-5.3-codex"
+model: "{model-A}"  # Use any available model
 prompt: |
   Review this agent.md file for a Copilot coding agent.
   The agent must be effective, well-scoped, and follow team protocols.
@@ -175,7 +177,7 @@ prompt: |
 
 ```
 agent_type: "code-review"
-model: "claude-sonnet-4.5"
+model: "{model-B}"  # Use a DIFFERENT model from model-A for diverse review
 prompt: [same prompt as above]
 ```
 
@@ -273,7 +275,7 @@ After onboarding, test that the agent can function within the team. Spawn an int
 ```
 task:
   agent_type: "code-review"
-  model: "gpt-5.3-codex"
+  model: "{available-model}"  # Use any available model
   prompt: |
     You are interviewing a newly onboarded agent for a development team.
     The agent's instructions are below. Evaluate whether it will work

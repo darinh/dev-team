@@ -107,12 +107,15 @@ python3 -c "
 import yaml, glob, os, sys
 d = yaml.safe_load(open('.team/org-chart.yaml'))
 chart_names = {a['name'] for a in d['team']['agents']}
-errors = 0
+warnings = 0
 for f in glob.glob('agents/*.agent.md'):
     name = os.path.basename(f).replace('.agent.md','')
     if name not in chart_names:
-        print(f'⚠️  {name}.agent.md exists but is not in org chart')
-if errors: sys.exit(1)
+        print(f'⚠️  {name}.agent.md exists but is not in org chart (may be a draft)')
+        warnings += 1
+if warnings == 0:
+    print('✅ All agent files have org chart entries')
+# Note: orphaned files are warnings, not errors — they may be templates or drafts
 "
 ```
 
@@ -158,6 +161,46 @@ for f in .team/memory/*.md; do
   fi
 done
 echo "✅ Memory format check complete"
+```
+
+### 6. Config Consistency
+
+```bash
+# Check for contradictory upstream settings
+python3 -c "
+import yaml, sys
+try:
+    d = yaml.safe_load(open('.team/config.yaml'))
+    upstream = d.get('upstream', {})
+    mode = upstream.get('mode', 'off')
+    auto_pr = upstream.get('auto_pr', False)
+    auto_issue = upstream.get('auto_issue', False)
+    
+    if mode == 'auto' and not auto_pr and not auto_issue:
+        print('⚠️  config.yaml: upstream.mode is \"auto\" but both auto_pr and auto_issue are false')
+        print('   Proposals will be written locally but never submitted.')
+        print('   Set at least one to true, or change mode to \"manual\".')
+    else:
+        print(f'✅ config.yaml: upstream settings consistent (mode={mode})')
+except Exception as e:
+    print(f'❌ config.yaml consistency: {e}', file=sys.stderr)
+    sys.exit(1)
+"
+```
+
+### 7. Entry Point Verification
+
+```bash
+# Verify dev-team agent exists in org chart and has an agent file
+python3 -c "
+import yaml, sys
+d = yaml.safe_load(open('.team/org-chart.yaml'))
+agent_names = [a['name'] for a in d['team']['agents']]
+if 'dev-team' not in agent_names:
+    print('⚠️  org-chart: no dev-team entry point agent found')
+else:
+    print('✅ org-chart: dev-team entry point present')
+"
 ```
 
 ## Exit Code

@@ -170,6 +170,7 @@ When the Hiring Manager creates a new agent with `status: probationary`:
 
 ### Review Process
 1. Read `.team/config.yaml` for probation settings (required tasks, review requirements)
+   - A "task" = any request producing a verifiable, committed output (code, docs, or config). Code reviews count. Brainstorming/queries do not.
 2. Wait for the probationary agent to complete the required number of real tasks
 3. Review each task's output:
    - Did the agent stay within its stated scope?
@@ -207,6 +208,7 @@ Follow the process in `.team/protocols/retrospective.md`:
 When you identify an improvement that benefits all framework users:
 
 1. Read `.team/config.yaml` to check the upstream mode
+   - **Validate**: If mode is `auto` but both `auto_pr` and `auto_issue` are false, warn the user: "Upstream mode is 'auto' but both submission methods are disabled. Proposals will be written locally but never submitted. Set at least one of auto_pr or auto_issue to true, or change mode to 'manual'."
 2. Write the proposal to `.team/knowledge/upstream-proposals/{id}.md` (always, regardless of mode)
 3. If `mode: auto` and `auto_pr: true`:
    - Use GitHub MCP tools to create a PR on the upstream repo
