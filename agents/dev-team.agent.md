@@ -29,48 +29,9 @@ If the file doesn't exist, this is a new project. Run setup:
    - "What's the tech stack? (languages, frameworks, platforms)"
    - "Is this a new project or an existing codebase?"
 
-3. **Ask about upstream contributions**:
-   - "Want improvements discovered in this project to be proposed back to the dev-team framework?"
-   - Choices: "Yes, automatically submit PRs/issues" / "Yes, but I'll review first" / "No"
+3. **Run the bootstrap-project skill**: Follow the steps in `skills/bootstrap-project/SKILL.md` to create the `.team/` directory, copy protocols, ask about upstream contributions, create config, and commit.
 
-4. **Initialize `.team/` directory**:
-   ```bash
-   mkdir -p .team/protocols .team/memory .team/skills .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects
-   ```
-
-5. **Copy protocol files** from the plugin's `protocols/` directory into `.team/protocols/`:
-   - Read each protocol file from the plugin directory
-   - Write it to `.team/protocols/`
-   - These are project-local copies that agents reference
-
-6. **Create `.team/config.yaml`** with the user's choices:
-   ```yaml
-   upstream:
-     mode: "{auto|manual|off}"
-     repo: "darinh/dev-team"
-     auto_pr: {true|false}
-     auto_issue: {true|false}
-     require_proof: true
-   probation:
-     required_tasks: 3
-     require_tech_lead_review: true
-   retrospective:
-     failure_threshold: 3
-     trigger_on_repeat: true
-   ```
-
-7. **Create `.team/org-chart.yaml`** with the default team (Operator, PM, HM, Tech Lead)
-
-8. **Create `.team/knowledge/failures.md`** (empty failure journal template)
-
-9. **Create `.team/memory/.gitkeep`**, `.team/skills/.gitkeep`, etc.
-
-10. **Commit the setup**:
-    ```bash
-    git add .team/ && git commit --author="DevTeam/dev-team <dev-team@dev-team.local>" -m "Initialize dev-team for this project"
-    ```
-
-11. **Assess the team**: Based on the tech stack the user described, spawn the Hiring Manager to analyze what specialist agents are needed.
+4. **Assess the team**: Based on the tech stack the user described, spawn the Hiring Manager to analyze what specialist agents are needed.
 
 ## Routing Requests
 
@@ -94,8 +55,10 @@ When routing to a specialist, spawn them with the `task` tool:
 
 ```
 task:
-  agent_type: "{specialist-agent-name}"
+  agent_type: "dev-team:{specialist-name}"
   prompt: |
+    Spawn depth: 1
+
     ## Context
     The user is working on project: {brief from .team/knowledge/projects/}
     Team composition: {from .team/org-chart.yaml}
@@ -109,6 +72,8 @@ task:
     - Record your outcome in your memory file when done
     - Commit with --author="DevTeam/{your-name} <{your-name}@dev-team.local>"
 ```
+
+**Note on agent naming**: Use the `dev-team:{agent}` format for the `agent_type` (e.g., `dev-team:project-manager`, `dev-team:hiring-manager`, `dev-team:operator`, `dev-team:tech-lead`). If the plugin agent format isn't available, fall back to `general-purpose` and include the specialist's full instructions in the prompt.
 
 ### Transparency
 

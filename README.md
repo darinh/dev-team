@@ -60,6 +60,8 @@ Plugin (installed once, shared):
 │   ├── skill-acquisition.md
 │   ├── agent-template.md
 │   └── retrospective.md
+├── skills/                        # Plugin skills
+│   └── bootstrap-project/         # Project initialization skill
 ├── plugin.json
 └── .mcp.json
 
@@ -87,6 +89,8 @@ g7h8i9j DevTeam/tech-lead      Update protocol from retrospective findings
 
 ### Dev-Team (`@dev-team`)
 Your single point of contact. Handles project setup, routes requests to specialists, and presents results. You rarely need to invoke other agents directly.
+
+> **Note**: You *can* invoke specialists directly (e.g., `@operator`, `@tech-lead`), and they'll help — but they'll recommend starting with `@dev-team` for coordinated workflows.
 
 ### Project Manager
 Brainstorms with you, gathers requirements, writes project briefs, creates phased plans with acceptance criteria, and coordinates specialists.

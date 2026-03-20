@@ -18,5 +18,6 @@
     "skill-acquisition"
   ],
   "agents": "agents/",
+  "skills": "skills/",
   "mcpServers": ".mcp.json"
 }
