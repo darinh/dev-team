@@ -79,15 +79,14 @@ Check the local skill registry:
 
 ```bash
 ls .team/skills/
-cat .team/skills/{skill-name}/README.md
+cat .team/skills/{skill-name}/SKILL.md
 ```
 
 Each custom skill has:
 ```
 .team/skills/{skill-name}/
-├── README.md           # What it does, how to use it, review status
-├── skill.md            # The skill implementation
-└── review-results.md   # Adversarial review findings and resolution
+├── SKILL.md            # Skill definition with YAML frontmatter (name, description) and implementation
+└── review-results.md   # Adversarial review findings and resolution (created during review)
 ```
 
 ## Step 4: Search External Sources
@@ -138,29 +137,34 @@ When no existing solution fits, create one:
 Create the skill directory:
 ```
 .team/skills/{skill-name}/
-├── README.md
-├── skill.md
+├── SKILL.md
 └── review-results.md  (created during review)
 ```
 
-**README.md template:**
+**SKILL.md template:**
+```yaml
+---
+name: {skill-name}
+description: {One-line description of what the skill does}
+---
+```
+
 ```markdown
-# {Skill Name}
+# {Skill Display Name}
 
-## Purpose
-{What this skill does and when to use it}
-
-## Author
-{Agent name that created it}
+{What this skill does and when to use it.}
 
 ## Status
 {Draft | Under Review | Approved | Deprecated}
 
+## Author
+{Agent name that created it}
+
 ## Dependencies
 {External packages, tools, or other skills required}
 
-## Usage
-{How to invoke/use this skill}
+## Steps
+{The actual skill implementation — step by step instructions}
 
 ## Limitations
 {What this skill cannot do}
@@ -168,7 +172,7 @@ Create the skill directory:
 
 ### 6b. Implement the Skill
 
-Write the skill implementation in `skill.md`. This should be a focused, reusable capability.
+Write the skill implementation in `SKILL.md` following the template above. This should be a focused, reusable capability.
 
 ### 6c. Adversarial Review
 
@@ -183,8 +187,8 @@ prompt: |
   Review this custom skill for correctness, security, and completeness.
 
   Skill: {skill-name}
-  Purpose: {from README}
-  Implementation: {content of skill.md}
+  Purpose: {from SKILL.md frontmatter}
+  Implementation: {content of SKILL.md}
 
   Check for:
   1. Correctness — Does it actually do what it claims?
@@ -202,12 +206,12 @@ prompt: |
 1. Fix all issues identified by reviewers
 2. Re-run the review if changes were significant
 3. Document the review results in `review-results.md`
-4. Update the skill status to "Approved" in README.md
+4. Update the skill status to "Approved" in SKILL.md
 
 **Max 2 review rounds.** If the skill still has issues after 2 rounds:
 - Document remaining concerns in review-results.md
 - Set status to "Approved with Caveats"
-- Note the caveats prominently in README.md
+- Note the caveats prominently in SKILL.md
 
 ## Step 7: Ask User (Last Resort)
 
@@ -239,6 +243,6 @@ When you create a useful skill:
 ## Skill Deprecation
 
 When a skill becomes obsolete:
-1. Set status to "Deprecated" in its README.md
+1. Set status to "Deprecated" in its SKILL.md
 2. Note the replacement (if any)
 3. Don't delete the directory — other agents may still reference it
