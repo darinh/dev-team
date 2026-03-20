@@ -1,0 +1,126 @@
+name: Version Bump
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore: bump version')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          # Find latest v* tag, default to v1.0.0
+          LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v1.0.0"
+            RANGE="HEAD"
+            echo "No existing tags found, defaulting to $LATEST_TAG"
+          else
+            RANGE="${LATEST_TAG}..HEAD"
+            echo "Latest tag: $LATEST_TAG"
+          fi
+
+          echo "current_version=${LATEST_TAG#v}" >> "$GITHUB_OUTPUT"
+
+          # Collect commit messages (subject + body)
+          COMMITS=$(git log "$RANGE" --pretty=format:'%B---END_COMMIT---')
+
+          if [ -z "$COMMITS" ]; then
+            echo "No commits found since $LATEST_TAG"
+            echo "bump_type=none" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BUMP="none"
+
+          while IFS= read -r -d '' COMMIT; do
+            SUBJECT=$(echo "$COMMIT" | head -n1)
+
+            # Check for BREAKING CHANGE in body/footer or ! after type
+            if echo "$COMMIT" | grep -qE '^BREAKING CHANGE:' || \
+               echo "$SUBJECT" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+              BUMP="major"
+              break
+            fi
+
+            # Check for feat: → minor
+            if echo "$SUBJECT" | grep -qE '^feat(\(.+\))?:'; then
+              if [ "$BUMP" != "major" ]; then
+                BUMP="minor"
+              fi
+            fi
+
+            # Check for patch-level prefixes
+            if echo "$SUBJECT" | grep -qE '^(fix|docs|chore|style|refactor|perf|test|build|ci)(\(.+\))?:'; then
+              if [ "$BUMP" = "none" ]; then
+                BUMP="patch"
+              fi
+            fi
+          done < <(echo "$COMMITS" | sed 's/---END_COMMIT---/\x00/g')
+
+          echo "Bump type: $BUMP"
+          echo "bump_type=$BUMP" >> "$GITHUB_OUTPUT"
+
+      - name: Apply version bump
+        if: steps.bump.outputs.bump_type != 'none'
+        env:
+          BUMP_TYPE: ${{ steps.bump.outputs.bump_type }}
+          CURRENT_VERSION: ${{ steps.bump.outputs.current_version }}
+        run: |
+          # Calculate new version
+          NEW_VERSION=$(python3 -c "
+          import json, sys
+
+          current = '${{ env.CURRENT_VERSION }}'
+          bump = '${{ env.BUMP_TYPE }}'
+          major, minor, patch = [int(x) for x in current.split('.')]
+
+          if bump == 'major':
+              major += 1
+              minor = 0
+              patch = 0
+          elif bump == 'minor':
+              minor += 1
+              patch = 0
+          elif bump == 'patch':
+              patch += 1
+
+          print(f'{major}.{minor}.{patch}')
+          ")
+
+          echo "Bumping version: v${CURRENT_VERSION} → v${NEW_VERSION}"
+
+          # Update plugin.json preserving formatting
+          python3 -c "
+          import json
+
+          with open('plugin.json', 'r') as f:
+              content = f.read()
+
+          data = json.loads(content)
+          data['version'] = '${NEW_VERSION}'
+
+          with open('plugin.json', 'w') as f:
+              json.dump(data, f, indent=2)
+              f.write('\n')
+          "
+
+          # Configure git identity
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Commit, tag, and push
+          git add plugin.json
+          git commit -m "chore: bump version to v${NEW_VERSION}"
+          git tag "v${NEW_VERSION}"
+          git push origin main --follow-tags

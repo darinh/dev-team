@@ -79,6 +79,24 @@ All agents must:
 - **Document decisions** — Record non-obvious choices in your memory file
 - **Respect boundaries** — Don't modify files outside your area of expertise without consulting the responsible agent
 
+## Commit Convention
+
+All commit messages must use [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+type: description
+```
+
+Common types:
+- `fix:` — Bug fixes (patch version bump)
+- `feat:` — New features (minor version bump)
+- `docs:` — Documentation changes (patch)
+- `chore:` — Maintenance tasks (patch)
+- `refactor:` — Code restructuring (patch)
+- `feat!:` or `BREAKING CHANGE:` in footer — Breaking changes (major version bump)
+
+This enables automatic version bumping when PRs merge to main.
+
 ## Communication Style
 
 When collaborating with other agents:

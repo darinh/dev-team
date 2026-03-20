@@ -211,6 +211,44 @@ bash .githooks/pre-commit
 3. Make changes (pre-commit hook validates on commit)
 4. Submit a PR with evidence of testing
 
+## Versioning
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) with automatic version bumping.
+
+### Commit Message Format
+
+```
+type: description
+
+[optional body]
+
+[optional footer]
+```
+
+### Version Bump Rules
+
+| Prefix | Bump | Example |
+|--------|------|---------|
+| `fix:` | patch (0.0.X) | `fix: validate skill orphaned agent detection` |
+| `docs:` | patch | `docs: add troubleshooting section` |
+| `chore:` | patch | `chore: update model pairings table` |
+| `refactor:` | patch | `refactor: simplify bootstrap flow` |
+| `feat:` | minor (0.X.0) | `feat: add onboard-codebase skill` |
+| `feat!:` | major (X.0.0) | `feat!: restructure .team/ directory layout` |
+| `BREAKING CHANGE:` in footer | major | Any commit with breaking changes |
+
+When multiple commits are in a PR, the **highest bump wins** (major > minor > patch). Commits without a conventional prefix are ignored for versioning.
+
+### How It Works
+
+1. Work in feature branches, commit with conventional prefixes
+2. Open a PR to `main`
+3. On merge, a GitHub Actions workflow scans the new commits
+4. The highest-level bump is applied to `plugin.json`
+5. A version commit and git tag (`vX.Y.Z`) are created automatically
+
+Current version is in `plugin.json`.
+
 ## Acknowledgments
 
 Inspired by [Anvil](https://github.com/burkeholland/anvil) by Burke Holland, which pioneered the adversarial multi-model review pattern for Copilot agents.

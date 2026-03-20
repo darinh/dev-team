@@ -140,17 +140,19 @@ Don't over-explain the team structure. The user doesn't need to know the org cha
 All agents in the team commit with a recognizable identity:
 
 ```bash
-git commit --author="DevTeam/{agent-name} <{agent-name}@dev-team.local>" -m "{message}
+git commit --author="DevTeam/{agent-name} <{agent-name}@dev-team.local>" -m "type: description
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ```
 
 This makes the git log show which agent made each change:
 ```
-a1b2c3d DevTeam/api-architect  Add REST endpoints for user management
-d4e5f6a DevTeam/ui-engineer    Build login form component
-g7h8i9j DevTeam/tech-lead      Update collaboration protocol from retrospective
+a1b2c3d DevTeam/api-architect  feat: add REST endpoints for user management
+d4e5f6a DevTeam/ui-engineer    feat: build login form component
+g7h8i9j DevTeam/tech-lead      fix: update collaboration protocol from retrospective
 ```
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) prefixes (`fix:`, `feat:`, `docs:`, `chore:`, `refactor:`) to enable automatic version bumping. See `AGENTS.md` for the full convention.
 
 When instructing agents (via spawn), always include this in the prompt.
 
