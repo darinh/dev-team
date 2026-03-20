@@ -1,202 +1,139 @@
 # Dev-Team
 
-An autonomous multi-agent software development framework for GitHub Copilot. Specialized agents collaborate, self-reflect on skill gaps, acquire capabilities, and grow organically based on project needs.
+An autonomous multi-agent software development framework for GitHub Copilot. Install the plugin, talk to `@dev-team`, and let specialized agents handle the rest.
 
 ## Quick Start
 
-### 1. Install into Your Project
+### 1. Install the Plugin
 
 ```bash
-# Clone the framework
-git clone <repo-url> dev-team-framework
-
-# Bootstrap into an existing repo
-./dev-team-framework/bootstrap.sh /path/to/your-project
-
-# Or bootstrap a new repo
-./dev-team-framework/bootstrap.sh /path/to/new-project --init-git
+copilot plugin install darinh/dev-team
 ```
 
-The bootstrap script:
-- Copies agents, protocols, org chart, and config into the target
-- Detects existing files and skips them (use `--force` to overwrite)
-- Is idempotent — safe to re-run after framework updates
-- Optionally initializes a git repo with `--init-git`
+### 2. Start Using It
 
-### 2. Start a New Project
-
-Brainstorm with the Project Manager — your primary point of contact:
+Open any project and invoke `@dev-team`:
 
 ```
-@project-manager I want to build a task management app with a REST API and React frontend.
+@dev-team I want to build a task management app with a REST API and React frontend.
 ```
 
-The Project Manager will:
-1. Ask probing questions to understand your vision
-2. Write a project brief with features, personas, and constraints
-3. Instruct the Hiring Manager to build a team tailored to your stack
-4. Bring in specialists for design consultations
-5. Create a phased project plan with acceptance criteria
+On first use in a project, `@dev-team` will:
+1. Ask a few questions about your project and preferences
+2. Initialize a `.team/` directory for project-specific state
+3. Bring in the Hiring Manager to create specialist agents for your stack
 
-### 3. Work with Your Team
-
-Open your project in VS Code with GitHub Copilot, then invoke the Hiring Manager:
+After setup, just keep talking to `@dev-team`. It routes your requests to the right specialist behind the scenes:
 
 ```
-@hiring-manager Analyze this project and create the specialist agents we need.
+@dev-team Let's brainstorm the data model for this app.
+@dev-team How's the team doing? Any issues?
+@dev-team We need a specialist for database optimization.
 ```
 
-The Hiring Manager will:
-1. Scan your project's tech stack, file structure, and dependencies
-2. Identify which specialist roles are needed
-3. Create agents tailored to your project
-4. Set up the org chart with the new team
-5. Run adversarial review on each new agent
+## How It Works
 
-### 3. Start Working
+You talk to one agent (`@dev-team`). It delegates to specialists:
 
-Once your team is built, invoke specialists directly or let the Project Manager coordinate:
-
-```
-@api-architect Design the REST API for user management
-@ui-engineer Build the login form component
-@data-engineer Optimize the user search query
-```
-
-Or ask the Operator about your team:
-
-```
-@operator What agents do we have and what are their capabilities?
-@operator What does the api-architect know about our authentication flow?
-```
+| You say... | Behind the scenes |
+|------------|-------------------|
+| "I want to build..." | → Project Manager brainstorms with you |
+| "Create a specialist for..." | → Hiring Manager builds the agent |
+| "What does the team know about...?" | → Operator queries all team state |
+| "Run a health check" | → Tech Lead reviews quality & failures |
+| "Fix this bug" / "Build this feature" | → Project Manager decomposes → specialists execute |
 
 ## Architecture
 
 ```
-your-project/
-├── .github/
-│   └── agents/                    # Copilot agent definitions
-│       ├── operator.agent.md      # Truth-only query interface
-│       ├── hiring-manager.agent.md # Team builder
-│       └── ...                    # Specialist agents (created by Hiring Manager)
-├── .team/
-│   ├── org-chart.yaml             # Team structure and hierarchy
-│   ├── protocols/                 # Shared operating protocols
-│   │   ├── collaboration.md       # How agents communicate
-│   │   ├── memory.md              # How agents persist knowledge
-│   │   ├── skill-acquisition.md   # How agents find/create skills
-│   │   └── agent-template.md      # Template for new agents
-│   ├── memory/                    # Per-agent persistent memory
-│   ├── skills/                    # Custom skills created by agents
-│   └── knowledge/                 # Shared project knowledge base
-└── AGENTS.md                      # Global instructions for all agents
+Plugin (installed once, shared):
+├── agents/                        # Agent definitions
+│   ├── dev-team.agent.md          # Entry point — you talk to this one
+│   ├── project-manager.agent.md   # Requirements, planning, brainstorming
+│   ├── hiring-manager.agent.md    # Creates/onboards agents
+│   ├── operator.agent.md          # Truth-only queries
+│   ├── tech-lead.agent.md         # Quality, retrospectives, improvement
+│   └── ...                        # Specialist agents (created per-project)
+├── protocols/                     # Protocol templates
+│   ├── collaboration.md
+│   ├── memory.md
+│   ├── skill-acquisition.md
+│   ├── agent-template.md
+│   └── retrospective.md
+├── plugin.json
+└── .mcp.json
+
+Project (per-repo state, created by @dev-team on first use):
+└── .team/
+    ├── config.yaml                # Project settings (upstream mode, etc.)
+    ├── org-chart.yaml             # Team structure
+    ├── protocols/                 # Local copies of protocols
+    ├── memory/                    # Per-agent persistent memory
+    ├── skills/                    # Custom skills
+    └── knowledge/                 # Project knowledge, failures, proposals
 ```
 
-## Core Concepts
+## Git Identity
 
-### Agents
-Each agent is a `*.agent.md` file with a distinct persona, expertise domain, and scope boundaries. Agents follow shared protocols for collaboration, memory, and skill acquisition.
+Each agent commits with a recognizable identity:
 
-### Organic Growth
-The team starts with just two agents (Operator + Hiring Manager). The Hiring Manager creates specialist agents as project needs emerge. Managers, divisions, and v-teams form only when team size or workload justifies them.
-
-### Truth-Only Operator
-The Operator agent can query all team state — memory files, org chart, skills, knowledge base — and never guesses or speculates. Every answer is backed by tool-call evidence. It's the user's trusted window into the team.
-
-### Skill Acquisition
-When an agent needs a capability it doesn't have:
-1. Checks if it's within its persona (if not, delegates to the right specialist)
-2. Searches existing skills, external packages, MCP servers
-3. Writes a custom skill with adversarial review
-4. Asks the user only as a last resort
-
-### Persistent Memory
-Each agent maintains a memory file that accumulates project-specific learnings across sessions. The Operator can search across all agents' memories.
-
-### Collaboration
-Agents communicate by spawning each other via the `task` tool with complete context. A max spawn depth of 3 prevents infinite delegation chains.
+```
+a1b2c3d DevTeam/api-architect  Add REST endpoints for user management
+d4e5f6a DevTeam/ui-engineer    Build login form component
+g7h8i9j DevTeam/tech-lead      Update protocol from retrospective findings
+```
 
 ## Built-in Agents
 
-### Project Manager (`@project-manager`)
-Your primary collaborator. Start here when you have an idea or a new project. The PM brainstorms with you, gathers requirements, writes project briefs, brings in specialists for design consultations, and coordinates the team to deliver.
+### Dev-Team (`@dev-team`)
+Your single point of contact. Handles project setup, routes requests to specialists, and presents results. You rarely need to invoke other agents directly.
 
-### Operator (`@operator`)
-The team's omniscient, truth-only query interface. Ask it anything about team state, agent knowledge, project context, or session history. It will answer with cited evidence or tell you it doesn't know.
+### Project Manager
+Brainstorms with you, gathers requirements, writes project briefs, creates phased plans with acceptance criteria, and coordinates specialists.
 
-### Hiring Manager (`@hiring-manager`)
-The team builder. Analyzes your project, creates specialist agents, maintains the org chart, and manages the skill marketplace. Can also onboard external agents — installing them, adapting them to team protocols, and interviewing them to ensure they integrate correctly. New agents start on probation.
+### Hiring Manager
+Creates specialist agents tailored to your project's tech stack. Can onboard external agents with protocol compliance testing. New agents start on probation.
 
-### Tech Lead (`@tech-lead`)
-The quality conscience. Reviews actual work output (git diffs, not just plans), runs team health checks, drives retrospectives when failures accumulate, and manages agent probation. Proposes improvements to protocols and agent instructions — and can submit upstream PRs/issues to the framework repo based on your project's config.
+### Operator
+Truth-only query interface. Asks it anything about team state, agent knowledge, or project context. Every answer backed by evidence. Never guesses.
 
-## Protocols
-
-| Protocol | Purpose | File |
-|----------|---------|------|
-| Collaboration | Agent spawning, depth limits, conflict resolution | `.team/protocols/collaboration.md` |
-| Memory | Persistent knowledge, shared knowledge base, ADRs | `.team/protocols/memory.md` |
-| Skill Acquisition | 7-step flow from self-assess to ask-user | `.team/protocols/skill-acquisition.md` |
-| Agent Template | Required structure for new agent.md files | `.team/protocols/agent-template.md` |
-| Retrospective | Outcome recording, failure journal, upstream proposals | `.team/protocols/retrospective.md` |
+### Tech Lead
+Reviews actual work quality (git diffs, not plans). Runs team health checks, drives retrospectives, manages agent probation, and proposes framework improvements.
 
 ## Continuous Improvement
 
 The framework improves over time through two feedback loops:
 
 ### Project-Level
-Agents record task outcomes (accepted/rejected/revised) and failures. The Tech Lead reviews patterns and proposes improvements to agent instructions and protocols.
+Agents record task outcomes and failures. The Tech Lead reviews patterns and improves agent instructions and protocols.
 
-### Framework-Level (Upstream Contributions)
-Improvements that benefit ALL projects flow back to this repo. Configure in `.team/config.yaml`:
+### Framework-Level (Upstream)
+Improvements that benefit ALL projects flow back to this repo. Configure per-project in `.team/config.yaml`:
 
-```yaml
-upstream:
-  mode: "auto"      # auto | manual | off
-  repo: "darinh/dev-team"
-  auto_pr: true     # Submit PRs directly
-  auto_issue: true  # Create issues for recommendations
-```
-
-- **`auto`**: Tech Lead submits PRs/issues with evidence, test scenarios, and justification
-- **`manual`**: Proposals written to `.team/knowledge/upstream-proposals/` for your review
+- **`auto`**: Tech Lead submits PRs/issues to `darinh/dev-team` with evidence and test scenarios
+- **`manual`**: Proposals written locally for your review before submitting
 - **`off`**: No upstream contributions
 
-Export pending proposals: `./bootstrap.sh /path/to/project --export-proposals`
+## Protocols
+
+| Protocol | Purpose |
+|----------|---------|
+| Collaboration | Agent spawning, depth limits, conflict resolution |
+| Memory | Persistent knowledge, shared knowledge base, ADRs |
+| Skill Acquisition | 7-step flow from self-assess to ask-user |
+| Agent Template | Required structure for new agent.md files |
+| Retrospective | Outcome recording, failure journal, upstream proposals |
 
 ## Configuration
 
-### Project Config (`.team/config.yaml`)
-Controls upstream contribution mode, agent probation settings, and retrospective thresholds. Edit at any time.
+After setup, edit `.team/config.yaml` in your project to change:
+- Upstream contribution mode (auto/manual/off)
+- Probation requirements (task count, review requirements)
+- Retrospective thresholds
 
-### MCP Servers (`.mcp.json`)
-Pre-configured with Context7 for documentation lookup. The Hiring Manager can add more MCP servers as the team discovers needs.
+## Acknowledgments
 
-### Global Instructions (`AGENTS.md`)
-Shared conventions that apply to all agents. Edit this to add project-specific rules.
-
-## Extending
-
-### Adding MCP Servers
-Ask the Hiring Manager to evaluate and add new MCP servers:
-```
-@hiring-manager We need an MCP server for database management. Find and evaluate options.
-```
-
-### Custom Skills
-Agents create custom skills in `.team/skills/` when external solutions don't exist. Each skill passes adversarial review before use.
-
-### Manual Agent Creation
-You can create agents manually by following the template in `.team/protocols/agent-template.md`. The Hiring Manager will integrate them into the org chart.
-
-## Design Principles
-
-1. **Agents stay in their lane** — No scope creep across personas
-2. **Grow organically** — Don't hire ahead of need
-3. **Truth over convenience** — The Operator never guesses
-4. **Evidence-backed** — Skills, decisions, and knowledge cite verifiable sources
-5. **Fleet-compatible** — Many agents can run in parallel
-6. **Portable** — Designed for Copilot, adaptable to other platforms
+Inspired by [Anvil](https://github.com/burkeholland/anvil) by Burke Holland, which pioneered the adversarial multi-model review pattern for Copilot agents.
 
 ## License
 

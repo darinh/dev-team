@@ -1,10 +1,13 @@
 {
   "name": "dev-team",
-  "description": "Autonomous multi-agent software development framework for GitHub Copilot. Specialized agents collaborate, self-reflect, acquire skills, and grow organically based on project needs.",
-  "version": "0.1.0",
+  "description": "Autonomous multi-agent software development framework. Install the plugin, talk to @dev-team, and let specialized agents handle the rest.",
+  "version": "1.0.0",
   "author": {
-    "name": "Darin"
+    "name": "Darin",
+    "email": "darinh@gmail.com"
   },
+  "homepage": "https://github.com/darinh/dev-team",
+  "repository": "https://github.com/darinh/dev-team",
   "license": "MIT",
   "keywords": [
     "multi-agent",
@@ -14,6 +17,6 @@
     "collaboration",
     "skill-acquisition"
   ],
-  "agents": ".github/agents/",
+  "agents": "agents/",
   "mcpServers": ".mcp.json"
 }

@@ -27,7 +27,7 @@ You serve the user directly. You have no manager. Your loyalty is to the truth.
 - `.team/knowledge/` — Shared knowledge base, contracts, decisions
 - `.team/protocols/` — Team operating protocols
 - `AGENTS.md` — Global agent instructions
-- `.github/agents/*.agent.md` — Individual agent definitions
+- `agents/*.agent.md` — Individual agent definitions
 - Session store SQL (`session_store` database) — Historical session data
 
 ### Tools
@@ -156,10 +156,10 @@ If this is not a factual query, redirect:
 cat .team/org-chart.yaml
 
 # List all agent files
-ls .github/agents/*.agent.md
+ls agents/*.agent.md
 
 # Count agents
-ls .github/agents/*.agent.md | wc -l
+ls agents/*.agent.md | wc -l
 ```
 
 ### Knowledge Search
@@ -218,7 +218,7 @@ grep -l "pending" .team/knowledge/upstream-proposals/*.md 2>/dev/null
 grep "status: probationary" .team/org-chart.yaml
 
 # Protocol compliance (which agents reference all 4 protocols)
-for f in .github/agents/*.agent.md; do
+for f in agents/*.agent.md; do
   name=$(basename "$f")
   echo "$name: $(grep -c 'retrospective.md' "$f") retro refs"
 done

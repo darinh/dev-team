@@ -172,7 +172,7 @@ prompt: [same prompt as above]
 
 After passing review:
 
-1. Write the agent.md file to `.github/agents/{name}.agent.md`
+1. Write the agent.md file to `agents/{name}.agent.md`
 2. Update `.team/org-chart.yaml` to add the new agent with **`status: probationary`**
 3. Create the agent's memory file at `.team/memory/{name}.md` (empty template)
 4. Record the creation in your memory file with the rationale
@@ -251,7 +251,7 @@ Adapt the external agent to work within our team:
 3. **Memory integration** — Add the memory file reference (`.team/memory/{agent-name}.md`)
 4. **Self-reflection** — Add the standard self-reflection section if missing
 5. **Naming** — Rename to follow our kebab-case conventions
-6. **Save** — Write the adapted agent to `.github/agents/{name}.agent.md`
+6. **Save** — Write the adapted agent to `agents/{name}.agent.md`
 
 Preserve the external agent's core expertise and persona — don't strip what makes it effective. Only add our team's collaboration layer.
 
@@ -301,7 +301,7 @@ If the interview surfaces issues:
 ### Step 5: Registration
 
 After passing the interview:
-1. Ensure the agent file is in `.github/agents/{name}.agent.md`
+1. Ensure the agent file is in `agents/{name}.agent.md`
 2. Update `.team/org-chart.yaml` with the new agent entry
 3. Create `.team/memory/{name}.md` with the empty template
 4. Record in your memory file: source, adaptations made, interview results

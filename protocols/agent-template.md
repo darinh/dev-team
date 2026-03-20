@@ -4,7 +4,7 @@ This template defines the structure and required sections for creating new `*.ag
 
 ## File Location
 
-All agent files must be placed in `.github/agents/{agent-name}.agent.md`.
+All agent files must be placed in `agents/{agent-name}.agent.md`.
 
 Agent names should be kebab-case descriptors of the role: `api-architect`, `ui-engineer`, `data-engineer`, etc.
 

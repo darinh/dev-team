@@ -2,12 +2,11 @@
 set -euo pipefail
 
 # dev-team bootstrap script
-# Installs the dev-team multi-agent framework into a new or existing repository.
+# Initializes the .team/ project state directory for a dev-team project.
+# The plugin (agents, protocols) is installed separately via:
+#   copilot plugin install darinh/dev-team
 #
-# Usage:
-#   ./bootstrap.sh /path/to/target-repo
-#   ./bootstrap.sh .                        # current directory
-#   ./bootstrap.sh /path/to/new-project --init-git
+# This script sets up the per-project state that agents need to operate.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET="${1:-.}"
@@ -26,6 +25,9 @@ while [[ $# -gt 0 ]]; do
       cat <<'EOF'
 Usage: bootstrap.sh <target-directory> [options]
 
+Initializes .team/ project state for dev-team. Install the plugin first:
+  copilot plugin install darinh/dev-team
+
 Options:
   --init-git          Initialize a git repository in the target directory
   --force             Overwrite existing files without prompting
@@ -35,7 +37,6 @@ Options:
 Examples:
   ./bootstrap.sh /path/to/my-project
   ./bootstrap.sh /path/to/new-project --init-git
-  ./bootstrap.sh . --force
   ./bootstrap.sh /path/to/my-project --export-proposals
 EOF
       exit 0
@@ -47,101 +48,6 @@ done
 # Resolve target to absolute path
 mkdir -p "$TARGET"
 TARGET="$(cd "$TARGET" && pwd)"
-
-echo "🔨 dev-team bootstrap"
-echo "   Source:  $SCRIPT_DIR"
-echo "   Target:  $TARGET"
-echo ""
-
-# --- Git initialization ---
-if [[ "$INIT_GIT" == true ]]; then
-  if [[ -d "$TARGET/.git" ]]; then
-    echo "⚠  Target already has a git repository. Skipping --init-git."
-  else
-    echo "📦 Initializing git repository..."
-    git -C "$TARGET" init -b main
-    echo ""
-  fi
-fi
-
-# Verify target is a git repo (warn if not, but don't block)
-if [[ ! -d "$TARGET/.git" ]]; then
-  echo "⚠  Target is not a git repository. Files will be copied but not committed."
-  echo "   Run with --init-git to initialize one, or run 'git init' yourself."
-  echo ""
-fi
-
-# --- Helper: copy file with conflict detection ---
-copy_file() {
-  local src="$1"
-  local dest="$2"
-
-  if [[ -f "$dest" ]] && [[ "$FORCE" != true ]]; then
-    if diff -q "$src" "$dest" > /dev/null 2>&1; then
-      echo "   ✓ $(basename "$dest") (already up to date)"
-      return 0
-    fi
-    echo "   ⚠ $(basename "$dest") exists and differs — skipped (use --force to overwrite)"
-    return 0
-  fi
-
-  mkdir -p "$(dirname "$dest")"
-  cp "$src" "$dest"
-  echo "   + $(basename "$dest")"
-}
-
-# --- Copy framework files ---
-
-echo "📁 Installing agent definitions..."
-mkdir -p "$TARGET/.github/agents"
-for agent_file in "$SCRIPT_DIR"/.github/agents/*.agent.md; do
-  [[ -f "$agent_file" ]] || continue
-  copy_file "$agent_file" "$TARGET/.github/agents/$(basename "$agent_file")"
-done
-
-echo "📁 Installing team infrastructure..."
-mkdir -p "$TARGET/.team/protocols" "$TARGET/.team/memory" "$TARGET/.team/skills" "$TARGET/.team/knowledge"
-
-for protocol_file in "$SCRIPT_DIR"/.team/protocols/*.md; do
-  [[ -f "$protocol_file" ]] || continue
-  copy_file "$protocol_file" "$TARGET/.team/protocols/$(basename "$protocol_file")"
-done
-
-copy_file "$SCRIPT_DIR/.team/org-chart.yaml" "$TARGET/.team/org-chart.yaml"
-copy_file "$SCRIPT_DIR/.team/config.yaml" "$TARGET/.team/config.yaml"
-
-# Ensure .gitkeep files exist in empty dirs
-for dir in memory skills knowledge; do
-  touch "$TARGET/.team/$dir/.gitkeep"
-done
-
-# Create knowledge subdirs
-mkdir -p "$TARGET/.team/knowledge/upstream-proposals" "$TARGET/.team/knowledge/retrospectives"
-touch "$TARGET/.team/knowledge/upstream-proposals/.gitkeep" "$TARGET/.team/knowledge/retrospectives/.gitkeep"
-
-# Copy failure journal template if not exists
-if [[ ! -f "$TARGET/.team/knowledge/failures.md" ]]; then
-  copy_file "$SCRIPT_DIR/.team/knowledge/failures.md" "$TARGET/.team/knowledge/failures.md"
-fi
-
-echo "📁 Installing configuration..."
-copy_file "$SCRIPT_DIR/AGENTS.md" "$TARGET/AGENTS.md"
-copy_file "$SCRIPT_DIR/plugin.json" "$TARGET/plugin.json"
-
-# .mcp.json: merge if target already has one, otherwise copy
-if [[ -f "$TARGET/.mcp.json" ]]; then
-  # Check if context7 is already configured
-  if grep -q "context7" "$TARGET/.mcp.json" 2>/dev/null; then
-    echo "   ✓ .mcp.json (context7 already configured)"
-  else
-    echo "   ⚠ .mcp.json exists — add context7 manually from $SCRIPT_DIR/.mcp.json"
-  fi
-else
-  copy_file "$SCRIPT_DIR/.mcp.json" "$TARGET/.mcp.json"
-fi
-
-# --- Add .team/ to .gitignore entries that should be ignored ---
-# (nothing to ignore — all .team/ files should be tracked)
 
 # --- Export upstream proposals ---
 if [[ "$EXPORT_PROPOSALS" == true ]]; then
@@ -165,8 +71,6 @@ if [[ "$EXPORT_PROPOSALS" == true ]]; then
   for proposal in $proposal_files; do
     count=$((count + 1))
     name=$(basename "$proposal" .md)
-    # Extract key fields
-    classification=$(grep -A1 "## Classification" "$proposal" | tail -1 || echo "unknown")
     priority=$(grep "Priority:" "$proposal" | head -1 | sed 's/.*: *//' || echo "unknown")
     status=$(grep "Submitted:" "$proposal" | head -1 | sed 's/.*: *//' || echo "unknown")
     echo "--- Proposal $count: $name ---"
@@ -177,18 +81,106 @@ if [[ "$EXPORT_PROPOSALS" == true ]]; then
   done
 
   echo "Total proposals: $count"
-  echo ""
-  echo "To review a proposal: cat <file>"
-  echo "To submit as PR: copy the 'Proposed Change' section to the framework repo"
   exit 0
 fi
 
+# --- Main bootstrap ---
+echo "🔨 dev-team project setup"
+echo "   Target:  $TARGET"
 echo ""
-echo "✅ dev-team framework installed!"
+
+# Git initialization
+if [[ "$INIT_GIT" == true ]]; then
+  if [[ -d "$TARGET/.git" ]]; then
+    echo "⚠  Target already has a git repository. Skipping --init-git."
+  else
+    echo "📦 Initializing git repository..."
+    git -C "$TARGET" init -b main
+    echo ""
+  fi
+fi
+
+# Check if already initialized
+if [[ -f "$TARGET/.team/config.yaml" ]] && [[ "$FORCE" != true ]]; then
+  echo "✅ Project already initialized (.team/config.yaml exists)."
+  echo "   Use --force to reinitialize, or just talk to @dev-team."
+  exit 0
+fi
+
+# Create directory structure
+echo "📁 Creating .team/ directory structure..."
+mkdir -p "$TARGET/.team/protocols" \
+         "$TARGET/.team/memory" \
+         "$TARGET/.team/skills" \
+         "$TARGET/.team/knowledge/upstream-proposals" \
+         "$TARGET/.team/knowledge/retrospectives" \
+         "$TARGET/.team/knowledge/projects"
+
+# Create .gitkeep files
+for dir in memory skills knowledge/upstream-proposals knowledge/retrospectives knowledge/projects; do
+  touch "$TARGET/.team/$dir/.gitkeep"
+done
+
+# Copy protocols from plugin
+echo "📁 Copying protocols..."
+if [[ -d "$SCRIPT_DIR/protocols" ]]; then
+  for protocol_file in "$SCRIPT_DIR"/protocols/*.md; do
+    [[ -f "$protocol_file" ]] || continue
+    dest="$TARGET/.team/protocols/$(basename "$protocol_file")"
+    if [[ -f "$dest" ]] && [[ "$FORCE" != true ]]; then
+      echo "   ✓ $(basename "$dest") (already exists)"
+    else
+      cp "$protocol_file" "$dest"
+      echo "   + $(basename "$dest")"
+    fi
+  done
+else
+  echo "   ⚠ Protocol files not found at $SCRIPT_DIR/protocols/"
+  echo "     They will be copied when @dev-team runs setup."
+fi
+
+# Copy default config and org chart
+echo "📁 Creating configuration..."
+for tmpl in config.yaml org-chart.yaml; do
+  src="$SCRIPT_DIR/.team/$tmpl"
+  dest="$TARGET/.team/$tmpl"
+  if [[ -f "$src" ]]; then
+    if [[ -f "$dest" ]] && [[ "$FORCE" != true ]]; then
+      echo "   ✓ $tmpl (already exists)"
+    else
+      cp "$src" "$dest"
+      echo "   + $tmpl"
+    fi
+  fi
+done
+
+# Copy failure journal template
+if [[ ! -f "$TARGET/.team/knowledge/failures.md" ]] || [[ "$FORCE" == true ]]; then
+  src="$SCRIPT_DIR/.team/knowledge/failures.md"
+  if [[ -f "$src" ]]; then
+    cp "$src" "$TARGET/.team/knowledge/failures.md"
+    echo "   + failures.md"
+  fi
+fi
+
+# Copy AGENTS.md
+src="$SCRIPT_DIR/AGENTS.md"
+dest="$TARGET/AGENTS.md"
+if [[ -f "$src" ]]; then
+  if [[ -f "$dest" ]] && [[ "$FORCE" != true ]]; then
+    echo "   ✓ AGENTS.md (already exists)"
+  else
+    cp "$src" "$dest"
+    echo "   + AGENTS.md"
+  fi
+fi
+
+echo ""
+echo "✅ Project initialized for dev-team!"
 echo ""
 echo "Next steps:"
-echo "  1. cd $TARGET"
-echo "  2. git add -A && git commit -m 'Add dev-team multi-agent framework'"
-echo "  3. Invoke @hiring-manager to build your team:"
-echo "     @hiring-manager Analyze this project and create the specialist agents we need."
+echo "  1. Install the plugin (if you haven't already):"
+echo "     copilot plugin install darinh/dev-team"
+echo "  2. Start using it:"
+echo "     @dev-team I want to build..."
 echo ""
