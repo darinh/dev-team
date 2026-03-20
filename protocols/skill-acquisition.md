@@ -178,11 +178,21 @@ Write the skill implementation in `SKILL.md` following the template above. This 
 
 **Every custom skill must pass adversarial review before use.**
 
-Spawn 2 review agents (using different models) in parallel:
+**Model selection**: Use two different models for cognitive diversity. Recommended pairings:
+
+| Model A | Model B |
+|---------|---------|
+| `claude-sonnet-4.5` | `gpt-4.1` |
+| `claude-sonnet-4.6` | `gpt-5.1-codex` |
+| `claude-haiku-4.5` | `gpt-5.4-mini` |
+
+Pick based on availability. Cross-family pairings (one Claude + one GPT) give the most diverse reviews.
+
+Spawn 2 review agents in parallel:
 
 ```
 agent_type: "code-review"
-model: "gpt-5.3-codex"  (or another model different from yours)
+model: "{model-A}"  # See recommended pairings above
 prompt: |
   Review this custom skill for correctness, security, and completeness.
 
@@ -199,6 +209,12 @@ prompt: |
 
   For each issue found: what's wrong, why it matters, and how to fix it.
   If nothing wrong, explicitly state "No issues found."
+```
+
+```
+agent_type: "code-review"
+model: "{model-B}"  # Use a DIFFERENT model from model-A for diverse review
+prompt: [same prompt as above]
 ```
 
 ### 6d. Address Review Findings

@@ -147,7 +147,15 @@ For each needed agent:
 
 Every new agent.md file must pass adversarial review before being added to the team.
 
-**Model selection**: Use two different models to get diverse review perspectives. Pick from whatever models are available in your environment. The key is using *different* models, not specific ones.
+**Model selection**: Use two different models to get diverse review perspectives. The key is using *different* models for cognitive diversity. Recommended pairings (pick one from each column):
+
+| Model A | Model B |
+|---------|---------|
+| `claude-sonnet-4.5` | `gpt-4.1` |
+| `claude-sonnet-4.6` | `gpt-5.1-codex` |
+| `claude-haiku-4.5` | `gpt-5.4-mini` |
+
+Pick based on what's available. If these specific models aren't available, use any two different models — cross-family pairings (e.g., one Claude + one GPT) give the most diverse reviews.
 
 Spawn 2 code-review agents in parallel with different models:
 
