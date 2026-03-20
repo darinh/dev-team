@@ -30,7 +30,7 @@ team:
   #   role:        Human-readable role title
   #   domain:      Primary expertise domain
   #   reports_to:  Manager agent name (or null for top-level)
-  #   status:      active | inactive | deprecated
+  #   status:      active | probationary | inactive | deprecated
   #   created:     ISO date when the agent was created
   #   skills:      List of key skills/competencies
   agents:
@@ -73,6 +73,20 @@ team:
         - "Skill gap analysis"
         - "Adversarial review coordination"
         - "Workforce planning"
+
+    - name: "tech-lead"
+      role: "Tech Lead"
+      domain: "Work quality, team health, retrospectives, agent probation, framework improvements"
+      reports_to: null  # Tech Lead serves the team, not a manager
+      status: active
+      created: "2026-03-19"
+      skills:
+        - "Work quality assessment"
+        - "Failure pattern analysis"
+        - "Protocol design and refinement"
+        - "Agent probation management"
+        - "Retrospective facilitation"
+        - "Upstream contribution management"
 
   # Organizational divisions (created by Hiring Manager when team grows)
   # Each division has:

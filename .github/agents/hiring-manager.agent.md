@@ -173,9 +173,27 @@ prompt: [same prompt as above]
 After passing review:
 
 1. Write the agent.md file to `.github/agents/{name}.agent.md`
-2. Update `.team/org-chart.yaml` to add the new agent
+2. Update `.team/org-chart.yaml` to add the new agent with **`status: probationary`**
 3. Create the agent's memory file at `.team/memory/{name}.md` (empty template)
 4. Record the creation in your memory file with the rationale
+5. Notify the Tech Lead that a new agent is on probation and needs real tasks assigned
+
+### Step 6: Probation
+
+New agents are NOT fully registered until they pass probation:
+
+1. Read `.team/config.yaml` for probation settings (`required_tasks`, `require_tech_lead_review`)
+2. The Project Manager (or user) assigns 2-3 real tasks from the current project to the probationary agent
+3. After the required tasks are completed, the Tech Lead reviews the actual output:
+   - Did the agent stay within scope?
+   - Did it follow protocols?
+   - Did it produce accepted output?
+   - Did it write to its memory file?
+4. Based on the Tech Lead's review:
+   - **Promote**: Update org chart `status` from `probationary` to `active`
+   - **Revise**: Apply the Tech Lead's suggested changes to the agent.md, re-run 1 more task
+   - **Retire**: If still failing after revision — set `status: deprecated`, document why in your memory
+5. Max 1 revision cycle. If the agent fails after revision, retire it.
 
 ## Organizational Management
 

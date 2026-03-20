@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET="${1:-.}"
 INIT_GIT=false
 FORCE=false
+EXPORT_PROPOSALS=false
 
 # Parse flags
 shift || true
@@ -20,19 +21,22 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --init-git) INIT_GIT=true; shift ;;
     --force)    FORCE=true; shift ;;
+    --export-proposals) EXPORT_PROPOSALS=true; shift ;;
     --help|-h)
       cat <<'EOF'
 Usage: bootstrap.sh <target-directory> [options]
 
 Options:
-  --init-git   Initialize a git repository in the target directory
-  --force      Overwrite existing files without prompting
-  -h, --help   Show this help message
+  --init-git          Initialize a git repository in the target directory
+  --force             Overwrite existing files without prompting
+  --export-proposals  Export upstream improvement proposals from the target project
+  -h, --help          Show this help message
 
 Examples:
   ./bootstrap.sh /path/to/my-project
   ./bootstrap.sh /path/to/new-project --init-git
   ./bootstrap.sh . --force
+  ./bootstrap.sh /path/to/my-project --export-proposals
 EOF
       exit 0
       ;;
@@ -104,11 +108,21 @@ for protocol_file in "$SCRIPT_DIR"/.team/protocols/*.md; do
 done
 
 copy_file "$SCRIPT_DIR/.team/org-chart.yaml" "$TARGET/.team/org-chart.yaml"
+copy_file "$SCRIPT_DIR/.team/config.yaml" "$TARGET/.team/config.yaml"
 
 # Ensure .gitkeep files exist in empty dirs
 for dir in memory skills knowledge; do
   touch "$TARGET/.team/$dir/.gitkeep"
 done
+
+# Create knowledge subdirs
+mkdir -p "$TARGET/.team/knowledge/upstream-proposals" "$TARGET/.team/knowledge/retrospectives"
+touch "$TARGET/.team/knowledge/upstream-proposals/.gitkeep" "$TARGET/.team/knowledge/retrospectives/.gitkeep"
+
+# Copy failure journal template if not exists
+if [[ ! -f "$TARGET/.team/knowledge/failures.md" ]]; then
+  copy_file "$SCRIPT_DIR/.team/knowledge/failures.md" "$TARGET/.team/knowledge/failures.md"
+fi
 
 echo "📁 Installing configuration..."
 copy_file "$SCRIPT_DIR/AGENTS.md" "$TARGET/AGENTS.md"
@@ -128,6 +142,46 @@ fi
 
 # --- Add .team/ to .gitignore entries that should be ignored ---
 # (nothing to ignore — all .team/ files should be tracked)
+
+# --- Export upstream proposals ---
+if [[ "$EXPORT_PROPOSALS" == true ]]; then
+  proposals_dir="$TARGET/.team/knowledge/upstream-proposals"
+  if [[ ! -d "$proposals_dir" ]]; then
+    echo "⚠  No upstream proposals directory found at $proposals_dir"
+    exit 0
+  fi
+
+  proposal_files=$(find "$proposals_dir" -name "*.md" ! -name ".gitkeep" 2>/dev/null)
+  if [[ -z "$proposal_files" ]]; then
+    echo "✅ No upstream proposals to export."
+    exit 0
+  fi
+
+  echo "📋 Upstream Improvement Proposals"
+  echo "================================="
+  echo ""
+
+  count=0
+  for proposal in $proposal_files; do
+    count=$((count + 1))
+    name=$(basename "$proposal" .md)
+    # Extract key fields
+    classification=$(grep -A1 "## Classification" "$proposal" | tail -1 || echo "unknown")
+    priority=$(grep "Priority:" "$proposal" | head -1 | sed 's/.*: *//' || echo "unknown")
+    status=$(grep "Submitted:" "$proposal" | head -1 | sed 's/.*: *//' || echo "unknown")
+    echo "--- Proposal $count: $name ---"
+    echo "  Priority: $priority"
+    echo "  Status:   $status"
+    echo "  File:     $proposal"
+    echo ""
+  done
+
+  echo "Total proposals: $count"
+  echo ""
+  echo "To review a proposal: cat <file>"
+  echo "To submit as PR: copy the 'Proposed Change' section to the framework repo"
+  exit 0
+fi
 
 echo ""
 echo "✅ dev-team framework installed!"

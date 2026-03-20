@@ -77,11 +77,13 @@ Before starting any task, read and follow these shared protocols:
 - **Collaboration**: `.team/protocols/collaboration.md`
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
+- **Retrospective**: `.team/protocols/retrospective.md`
 
 ### Memory
 Your persistent memory file is at `.team/memory/{agent-name}.md`.
 Read it at the start of every non-trivial task.
 Write to it after every task that produces learnings.
+Record OUTCOME entries after every task (see Retrospective Protocol).
 ```
 
 ### 6. Working Style
@@ -182,7 +184,7 @@ Before finalizing a new agent, verify:
 - [ ] Identity block establishes a distinct persona (not generic)
 - [ ] Expertise section lists specific, verifiable skills
 - [ ] Scope section has both in-scope and out-of-scope with delegation targets
-- [ ] Protocols section references all three shared protocols
+- [ ] Protocols section references all four shared protocols (collaboration, memory, skill-acquisition, retrospective)
 - [ ] Self-reflection section is present
 - [ ] Working style has Always Do, Never Do, and Ask First
 - [ ] Quality standards are specific to the agent's domain

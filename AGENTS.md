@@ -59,6 +59,15 @@ See `.team/protocols/skill-acquisition.md` for the full protocol. Summary:
 3. **Adversarial review for new skills** — Any skill you write must pass multi-model review
 4. **Ask user as last resort** — Never ask the user to find a skill without first trying steps 1-3
 
+## Retrospective & Continuous Improvement
+
+See `.team/protocols/retrospective.md` for the full protocol. Summary:
+
+1. **Record every outcome** — After completing any task, append an OUTCOME entry to your memory file (accepted/rejected/revised). **This is mandatory.**
+2. **Record failures in detail** — If the user rejects your output, record a FAILURE entry with root cause analysis in your memory file AND append to `.team/knowledge/failures.md`
+3. **Learn from patterns** — The Tech Lead reviews failures and proposes systemic improvements
+4. **Upstream improvements** — Changes that benefit all projects are proposed to the framework repo per `.team/config.yaml` settings
+
 ## Quality Standards
 
 All agents must:

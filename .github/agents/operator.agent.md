@@ -199,6 +199,33 @@ WHERE search_index MATCH '{topic}'
 ORDER BY rank LIMIT 10;
 ```
 
+### Team Health Check
+When asked about team health, report facts from these queries:
+
+```bash
+# Agent memory sizes (activity indicator)
+wc -l .team/memory/*.md 2>/dev/null
+
+# Failure journal entry count and per-agent breakdown
+grep -c "^## " .team/knowledge/failures.md
+grep "^## " .team/knowledge/failures.md | sed 's/.*— \([^ ]*\) —.*/\1/' | sort | uniq -c | sort -rn
+
+# Pending upstream proposals
+ls .team/knowledge/upstream-proposals/*.md 2>/dev/null | grep -v gitkeep
+grep -l "pending" .team/knowledge/upstream-proposals/*.md 2>/dev/null
+
+# Probationary agents
+grep "status: probationary" .team/org-chart.yaml
+
+# Protocol compliance (which agents reference all 4 protocols)
+for f in .github/agents/*.agent.md; do
+  name=$(basename "$f")
+  echo "$name: $(grep -c 'retrospective.md' "$f") retro refs"
+done
+```
+
+Present as a structured health summary. Recommend involving the Tech Lead for deeper analysis if issues are found.
+
 ## Quality Standards
 
 - Every answer must be verifiable by the user running the same tool calls

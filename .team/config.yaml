@@ -1,0 +1,46 @@
+# Dev-Team Project Configuration
+#
+# Project-level settings that control framework behavior.
+# This file is read by agents to determine how to handle
+# upstream contributions, team policies, and project-specific overrides.
+#
+# Edit this file to change behavior at any time.
+
+# Upstream contribution settings
+# Controls how improvements discovered in this project flow back
+# to the framework repository.
+upstream:
+  # Mode: auto | manual | off
+  #   auto   - Tech Lead submits PRs/issues directly via GitHub API
+  #   manual - Tech Lead writes proposal files for user review
+  #   off    - Proposals are still written locally but not submitted
+  mode: "manual"
+
+  # The framework repository to submit proposals to
+  repo: "darinh/dev-team"
+
+  # When mode is "auto":
+  #   auto_pr    - Create pull requests for changes with exact diffs
+  #   auto_issue - Create issues for recommendations without specific diffs
+  auto_pr: false
+  auto_issue: false
+
+  # Require verifiable proof (test scenarios, before/after examples)
+  # in all upstream proposals
+  require_proof: true
+
+# Agent probation settings
+probation:
+  # Number of real tasks before promotion to active
+  required_tasks: 3
+
+  # Whether Tech Lead review is required for promotion
+  require_tech_lead_review: true
+
+# Retrospective settings
+retrospective:
+  # Number of new failure journal entries before triggering a retrospective
+  failure_threshold: 3
+
+  # Whether to auto-trigger retrospective when a root cause repeats
+  trigger_on_repeat: true

@@ -15,10 +15,14 @@
 .PARAMETER Force
     Overwrite existing files without prompting.
 
+.PARAMETER ExportProposals
+    Export upstream improvement proposals from the target project.
+
 .EXAMPLE
     .\bootstrap.ps1 C:\Projects\my-app
     .\bootstrap.ps1 C:\Projects\new-app -InitGit
     .\bootstrap.ps1 . -Force
+    .\bootstrap.ps1 C:\Projects\my-app -ExportProposals
 #>
 
 [CmdletBinding()]
@@ -27,7 +31,8 @@ param(
     [string]$Target = ".",
 
     [switch]$InitGit,
-    [switch]$Force
+    [switch]$Force,
+    [switch]$ExportProposals
 )
 
 $ErrorActionPreference = "Stop"
@@ -120,12 +125,34 @@ Get-ChildItem (Join-Path $ScriptDir ".team" "protocols" "*.md") -ErrorAction Sil
 }
 
 Copy-FrameworkFile (Join-Path $ScriptDir ".team" "org-chart.yaml") (Join-Path $Target ".team" "org-chart.yaml")
+Copy-FrameworkFile (Join-Path $ScriptDir ".team" "config.yaml") (Join-Path $Target ".team" "config.yaml")
 
 # Ensure .gitkeep files exist in empty dirs
 foreach ($subdir in @("memory", "skills", "knowledge")) {
     $gitkeep = Join-Path $Target ".team" $subdir ".gitkeep"
     if (-not (Test-Path $gitkeep)) {
         New-Item -ItemType File -Path $gitkeep -Force | Out-Null
+    }
+}
+
+# Create knowledge subdirs
+foreach ($subdir in @("upstream-proposals", "retrospectives")) {
+    $dir = Join-Path $Target ".team" "knowledge" $subdir
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    $gitkeep = Join-Path $dir ".gitkeep"
+    if (-not (Test-Path $gitkeep)) {
+        New-Item -ItemType File -Path $gitkeep -Force | Out-Null
+    }
+}
+
+# Copy failure journal template if not exists
+$failuresTarget = Join-Path $Target ".team" "knowledge" "failures.md"
+if (-not (Test-Path $failuresTarget)) {
+    $failuresSrc = Join-Path $ScriptDir ".team" "knowledge" "failures.md"
+    if (Test-Path $failuresSrc) {
+        Copy-FrameworkFile $failuresSrc $failuresTarget
     }
 }
 
@@ -145,6 +172,43 @@ if (Test-Path $mcpTarget) {
 }
 else {
     Copy-FrameworkFile (Join-Path $ScriptDir ".mcp.json") $mcpTarget
+}
+
+# --- Export upstream proposals ---
+if ($ExportProposals) {
+    $proposalsDir = Join-Path $Target ".team" "knowledge" "upstream-proposals"
+    if (-not (Test-Path $proposalsDir)) {
+        Write-Host "⚠  No upstream proposals directory found."
+        exit 0
+    }
+
+    $proposals = Get-ChildItem $proposalsDir -Filter "*.md" | Where-Object { $_.Name -ne ".gitkeep" }
+    if ($proposals.Count -eq 0) {
+        Write-Host "✅ No upstream proposals to export."
+        exit 0
+    }
+
+    Write-Host "📋 Upstream Improvement Proposals"
+    Write-Host "================================="
+    Write-Host ""
+
+    $count = 0
+    foreach ($proposal in $proposals) {
+        $count++
+        $content = Get-Content $proposal.FullName -Raw
+        $priority = if ($content -match "Priority:\s*(.+)") { $Matches[1].Trim() } else { "unknown" }
+        $status = if ($content -match "Submitted:\s*(.+)") { $Matches[1].Trim() } else { "unknown" }
+        Write-Host "--- Proposal ${count}: $($proposal.BaseName) ---"
+        Write-Host "  Priority: $priority"
+        Write-Host "  Status:   $status"
+        Write-Host "  File:     $($proposal.FullName)"
+        Write-Host ""
+    }
+
+    Write-Host "Total proposals: $count"
+    Write-Host ""
+    Write-Host "To review a proposal: Get-Content <file>"
+    exit 0
 }
 
 Write-Host ""

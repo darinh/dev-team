@@ -125,7 +125,10 @@ Your primary collaborator. Start here when you have an idea or a new project. Th
 The team's omniscient, truth-only query interface. Ask it anything about team state, agent knowledge, project context, or session history. It will answer with cited evidence or tell you it doesn't know.
 
 ### Hiring Manager (`@hiring-manager`)
-The team builder. Analyzes your project, creates specialist agents, maintains the org chart, and manages the skill marketplace. Can also onboard external agents — installing them, adapting them to team protocols, and interviewing them to ensure they integrate correctly.
+The team builder. Analyzes your project, creates specialist agents, maintains the org chart, and manages the skill marketplace. Can also onboard external agents — installing them, adapting them to team protocols, and interviewing them to ensure they integrate correctly. New agents start on probation.
+
+### Tech Lead (`@tech-lead`)
+The quality conscience. Reviews actual work output (git diffs, not just plans), runs team health checks, drives retrospectives when failures accumulate, and manages agent probation. Proposes improvements to protocols and agent instructions — and can submit upstream PRs/issues to the framework repo based on your project's config.
 
 ## Protocols
 
@@ -135,8 +138,36 @@ The team builder. Analyzes your project, creates specialist agents, maintains th
 | Memory | Persistent knowledge, shared knowledge base, ADRs | `.team/protocols/memory.md` |
 | Skill Acquisition | 7-step flow from self-assess to ask-user | `.team/protocols/skill-acquisition.md` |
 | Agent Template | Required structure for new agent.md files | `.team/protocols/agent-template.md` |
+| Retrospective | Outcome recording, failure journal, upstream proposals | `.team/protocols/retrospective.md` |
+
+## Continuous Improvement
+
+The framework improves over time through two feedback loops:
+
+### Project-Level
+Agents record task outcomes (accepted/rejected/revised) and failures. The Tech Lead reviews patterns and proposes improvements to agent instructions and protocols.
+
+### Framework-Level (Upstream Contributions)
+Improvements that benefit ALL projects flow back to this repo. Configure in `.team/config.yaml`:
+
+```yaml
+upstream:
+  mode: "auto"      # auto | manual | off
+  repo: "darinh/dev-team"
+  auto_pr: true     # Submit PRs directly
+  auto_issue: true  # Create issues for recommendations
+```
+
+- **`auto`**: Tech Lead submits PRs/issues with evidence, test scenarios, and justification
+- **`manual`**: Proposals written to `.team/knowledge/upstream-proposals/` for your review
+- **`off`**: No upstream contributions
+
+Export pending proposals: `./bootstrap.sh /path/to/project --export-proposals`
 
 ## Configuration
+
+### Project Config (`.team/config.yaml`)
+Controls upstream contribution mode, agent probation settings, and retrospective thresholds. Edit at any time.
 
 ### MCP Servers (`.mcp.json`)
 Pre-configured with Context7 for documentation lookup. The Hiring Manager can add more MCP servers as the team discovers needs.
