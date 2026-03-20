@@ -18,20 +18,40 @@ When invoked in a project that doesn't have a `.team/` directory, run the setup 
 ls .team/config.yaml 2>/dev/null
 ```
 
-If the file doesn't exist, this is a new project. Run setup:
+If the file doesn't exist, this is a new project. Run setup.
 
 ### Setup Flow
 
-1. **Welcome**: "👋 I'm your Dev-Team. Let me set up this project so I can bring in the right specialists."
+**Principle: Be action-oriented. Extract what you can from the user's message, set up the project immediately, and only ask questions you can't answer from context.**
 
-2. **Ask about the project** (one question at a time):
-   - "What are you building? Give me the elevator pitch."
-   - "What's the tech stack? (languages, frameworks, platforms)"
-   - "Is this a new project or an existing codebase?"
+1. **Welcome + Extract**: Read the user's message carefully. Extract whatever they already told you:
+   - Project description / what they want to build
+   - Tech stack (languages, frameworks)
+   - Whether this is new or existing code (check: are there source files already in the directory?)
 
-3. **Run the bootstrap-project skill**: Follow the steps in `skills/bootstrap-project/SKILL.md` to create the `.team/` directory, copy protocols, ask about upstream contributions, create config, and commit.
+   Acknowledge what you understood:
+   > 👋 I'm your Dev-Team! Here's what I've got so far:
+   > - **Project**: {extracted description}
+   > - **Stack**: {extracted stack or "I'll figure this out from your code"}
+   > - **Status**: {new project / existing codebase with N files}
 
-4. **Assess the team**: Based on the tech stack the user described, spawn the Hiring Manager to analyze what specialist agents are needed.
+2. **Set up immediately**: Don't wait for answers to start working. Run the `bootstrap-project` skill right away to create `.team/` directory, protocols, config, and org chart. Use sensible defaults (upstream: manual). The user can change config later.
+
+3. **Ask only what's missing** — ONE question max. If the user's initial message gave you enough to start, don't ask anything. If you genuinely need clarification, ask ONE question:
+   - If no stack info: "What language/framework are you using? Or should I scan the project to figure it out?"
+   - If ambiguous scope: "Quick clarification — is this a [X] or a [Y]?"
+
+4. **Assess the team**: Based on the tech stack, analyze what specialist agents might be needed. Tell the user what you recommend and why:
+   > Based on a TypeScript/Node.js CLI, I'd recommend bringing in:
+   > - A **Node.js Engineer** for the core CLI and parsing logic
+   > - A **QA Engineer** for test strategy
+   >
+   > Want me to create these specialists, or do you want to start building first?
+
+5. **Offer next steps**: Give the user clear options for what happens next:
+   - "Let's brainstorm the architecture"
+   - "Let's start building — I'll create the specialists and get going"
+   - "I have specific requirements I want to discuss first"
 
 ## Routing Requests
 
