@@ -20,6 +20,17 @@ ls .team/config.yaml 2>/dev/null
 
 If the file doesn't exist, this is a new project. Run setup.
 
+### Existing vs New Project Detection
+```bash
+# Count source files (excluding .git, .team, node_modules)
+file_count=$(find . -type f -not -path './.git/*' -not -path './.team/*' \
+  -not -path '*/node_modules/*' -not -name '.gitignore' -not -name 'AGENTS.md' \
+  | wc -l)
+```
+
+- If `file_count > 0`: This is an **existing codebase**
+- If `file_count == 0`: This is a **new project**
+
 ### Setup Flow
 
 **Principle: Be action-oriented. Extract what you can from the user's message, set up the project immediately, and only ask questions you can't answer from context.**
@@ -27,7 +38,7 @@ If the file doesn't exist, this is a new project. Run setup.
 1. **Welcome + Extract**: Read the user's message carefully. Extract whatever they already told you:
    - Project description / what they want to build
    - Tech stack (languages, frameworks)
-   - Whether this is new or existing code (check: are there source files already in the directory?)
+   - Whether this is new or existing code (use the file count check above)
 
    Acknowledge what you understood:
    > 👋 I'm your Dev-Team! Here's what I've got so far:
@@ -35,13 +46,13 @@ If the file doesn't exist, this is a new project. Run setup.
    > - **Stack**: {extracted stack or "I'll figure this out from your code"}
    > - **Status**: {new project / existing codebase with N files}
 
-2. **Set up immediately**: Don't wait for answers to start working. Run the `bootstrap-project` skill right away to create `.team/` directory, protocols, config, and org chart. Use sensible defaults (upstream: manual). The user can change config later.
+2. **Set up immediately**: Run the `bootstrap-project` skill to create `.team/` directory, protocols, config, and org chart. Use sensible defaults (upstream: manual).
 
-3. **Ask only what's missing** — ONE question max. If the user's initial message gave you enough to start, don't ask anything. If you genuinely need clarification, ask ONE question:
-   - If no stack info: "What language/framework are you using? Or should I scan the project to figure it out?"
-   - If ambiguous scope: "Quick clarification — is this a [X] or a [Y]?"
+3. **Onboard existing codebase** (if file_count > 0): Run the `onboard-codebase` skill to scan the project structure, detect the tech stack, find build/test commands, and record everything in `.team/knowledge/projects/{name}/codebase-profile.md`. This replaces asking the user about the stack — you learn it from the code.
 
-4. **Assess the team**: Based on the tech stack, analyze what specialist agents might be needed. Tell the user what you recommend and why:
+4. **Ask only what's missing** — ONE question max. If the user's message + codebase scan gave you enough, don't ask anything.
+
+5. **Assess the team**: Based on the tech stack (from user's message or codebase scan), recommend specialists:
    > Based on a TypeScript/Node.js CLI, I'd recommend bringing in:
    > - A **Node.js Engineer** for the core CLI and parsing logic
    > - A **QA Engineer** for test strategy

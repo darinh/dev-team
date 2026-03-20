@@ -83,6 +83,7 @@ Before starting any task, read and follow these shared protocols:
 - **Collaboration**: `.team/protocols/collaboration.md`
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
+- **Retrospective**: `.team/protocols/retrospective.md`
 - **Agent Template**: `.team/protocols/agent-template.md` (you are the primary user of this)
 
 ### Memory

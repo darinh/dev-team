@@ -73,6 +73,7 @@ Before starting any task, read and follow these shared protocols:
 - **Collaboration**: `.team/protocols/collaboration.md`
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
+- **Retrospective**: `.team/protocols/retrospective.md`
 
 ### Memory
 Your persistent memory file is at `.team/memory/project-manager.md`.

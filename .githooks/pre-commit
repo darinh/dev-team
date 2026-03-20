@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# dev-team pre-commit hook
+# Validates framework consistency before allowing commits.
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+echo "🔨 dev-team pre-commit validation"
+echo ""
+
+errors=0
+
+# --- 1. YAML Schema Validation ---
+if [ -f .team/org-chart.yaml ]; then
+  python3 -c "
+import yaml, sys
+try:
+    d = yaml.safe_load(open('.team/org-chart.yaml'))
+    team = d.get('team', {})
+    assert 'agents' in team, 'Missing team.agents'
+    assert isinstance(team['agents'], list), 'team.agents must be a list'
+    for a in team['agents']:
+        assert 'name' in a, f'Agent missing name: {a}'
+        assert 'role' in a, f'Agent {a.get(\"name\",\"?\")} missing role'
+        assert 'status' in a, f'Agent {a.get(\"name\",\"?\")} missing status'
+        valid = ('active','probationary','inactive','deprecated')
+        assert a['status'] in valid, f'Agent {a[\"name\"]} invalid status: {a[\"status\"]}'
+    print(f'  ✅ org-chart.yaml ({len(team[\"agents\"])} agents)')
+except Exception as e:
+    print(f'  ❌ org-chart.yaml: {e}', file=sys.stderr)
+    sys.exit(1)
+" || errors=$((errors + 1))
+fi
+
+if [ -f .team/config.yaml ]; then
+  python3 -c "
+import yaml, sys
+try:
+    d = yaml.safe_load(open('.team/config.yaml'))
+    upstream = d.get('upstream', {})
+    assert 'mode' in upstream, 'Missing upstream.mode'
+    assert upstream['mode'] in ('auto','manual','off'), f'Invalid mode: {upstream[\"mode\"]}'
+    print(f'  ✅ config.yaml (upstream: {upstream[\"mode\"]})')
+except Exception as e:
+    print(f'  ❌ config.yaml: {e}', file=sys.stderr)
+    sys.exit(1)
+" || errors=$((errors + 1))
+fi
+
+# --- 2. Agent Template Compliance ---
+agent_errors=0
+for f in agents/*.agent.md; do
+  [ -f "$f" ] || continue
+  name=$(basename "$f")
+  missing=""
+
+  head -1 "$f" | grep -q '^---$' || missing="$missing frontmatter"
+  grep -qi '## Scope' "$f"           || missing="$missing Scope"
+  grep -qi '## Working Style' "$f"   || missing="$missing Working-Style"
+  grep -qi '## Self-Reflection' "$f" || missing="$missing Self-Reflection"
+
+  if [ -n "$missing" ]; then
+    echo "  ❌ $name: missing:$missing"
+    agent_errors=$((agent_errors + 1))
+  fi
+done
+
+if [ $agent_errors -eq 0 ]; then
+  agent_count=$(ls agents/*.agent.md 2>/dev/null | wc -l)
+  echo "  ✅ Agent compliance ($agent_count agents)"
+else
+  errors=$((errors + agent_errors))
+fi
+
+# --- 3. Cross-Reference Integrity ---
+if [ -f .team/org-chart.yaml ]; then
+  python3 -c "
+import yaml, os, sys
+d = yaml.safe_load(open('.team/org-chart.yaml'))
+errors = 0
+for a in d['team']['agents']:
+    path = f'agents/{a[\"name\"]}.agent.md'
+    if not os.path.exists(path):
+        print(f'  ❌ Org chart: \"{a[\"name\"]}\" has no agent file')
+        errors += 1
+if errors == 0:
+    print(f'  ✅ Cross-references valid')
+sys.exit(1 if errors else 0)
+" || errors=$((errors + 1))
+fi
+
+# --- 4. Protocol References ---
+proto_errors=0
+for f in agents/*.agent.md; do
+  [ -f "$f" ] || continue
+  name=$(basename "$f")
+  for proto in collaboration.md memory.md skill-acquisition.md retrospective.md; do
+    if ! grep -q "$proto" "$f"; then
+      echo "  ❌ $name: missing $proto reference"
+      proto_errors=$((proto_errors + 1))
+    fi
+  done
+done
+
+if [ $proto_errors -eq 0 ]; then
+  echo "  ✅ Protocol references"
+else
+  errors=$((errors + proto_errors))
+fi
+
+# --- Result ---
+echo ""
+if [ $errors -eq 0 ]; then
+  echo "✅ All checks passed"
+  exit 0
+else
+  echo "❌ $errors check(s) failed — commit blocked"
+  exit 1
+fi

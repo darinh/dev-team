@@ -34,6 +34,17 @@ team:
   #   created:     ISO date when the agent was created
   #   skills:      List of key skills/competencies
   agents:
+    - name: "dev-team"
+      role: "Dev-Team Concierge"
+      domain: "Entry point, project setup, request routing"
+      reports_to: null  # Entry point — serves the user directly
+      status: active
+      created: "2026-03-20"
+      skills:
+        - "Project setup and onboarding"
+        - "Request routing to specialists"
+        - "Codebase analysis"
+
     - name: "operator"
       role: "Operator"
       domain: "Team operations and state queries"
