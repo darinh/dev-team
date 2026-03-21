@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# dev-team commit-msg hook
+# dev-team post-commit hook
 # Reads the commit message and bumps plugin.json version based on
-# Conventional Commits convention:
-#   feat!: or BREAKING CHANGE → major
-#   feat:                      → minor
-#   fix: docs: chore: refactor: → patch
+# Conventional Commits, then amends the commit to include the bump.
 #
-# Only bumps if plugin content (agents/, protocols/, skills/, .githooks/)
-# is in the staged changes. Pure .team/ or docs-only commits don't bump.
+# Convention:
+#   feat!: or BREAKING CHANGE → major bump
+#   feat:                      → minor bump
+#   fix: docs: chore: refactor: etc. → patch bump
+#   No prefix or non-plugin files only → no bump
 #
 # Install: git config core.hooksPath .githooks
 
@@ -15,14 +15,16 @@ set -euo pipefail
 
 [ -f plugin.json ] || exit 0
 
-commit_msg_file="$1"
-commit_msg=$(cat "$commit_msg_file")
+# Prevent infinite loop (amend triggers post-commit again)
+if [ "${DEVTEAM_BUMPING:-}" = "1" ]; then
+  exit 0
+fi
 
-# Check if any plugin content changed
-staged_files=$(git diff --cached --name-only 2>/dev/null || true)
+# Check if any plugin content changed in the last commit
+changed_files=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || true)
 plugin_changed=false
 
-for sf in $staged_files; do
+for sf in $changed_files; do
   case "$sf" in
     agents/*|protocols/*|skills/*|.githooks/*) plugin_changed=true ;;
   esac
@@ -30,18 +32,18 @@ done
 
 [ "$plugin_changed" = true ] || exit 0
 
-# Determine bump type from commit message
+# Read commit message
+commit_msg=$(git log -1 --format='%B')
+
+# Determine bump type
 bump="none"
 
-# Check for breaking change (major)
-if echo "$commit_msg" | head -1 | grep -qE '^[a-z]+!:'; then
+if echo "$commit_msg" | head -1 | grep -qE '^[a-z]+!(\(.+\))?:'; then
   bump="major"
 elif echo "$commit_msg" | grep -q 'BREAKING CHANGE'; then
   bump="major"
-# Check for feat (minor)
 elif echo "$commit_msg" | head -1 | grep -qE '^feat(\(.+\))?:'; then
   bump="minor"
-# Check for fix, docs, chore, refactor (patch)
 elif echo "$commit_msg" | head -1 | grep -qE '^(fix|docs|chore|refactor|style|perf|test|ci|build)(\(.+\))?:'; then
   bump="patch"
 fi
@@ -52,7 +54,6 @@ fi
 current_version=$(python3 -c "import json; print(json.load(open('plugin.json'))['version'])" 2>/dev/null || echo "0.0.0")
 IFS='.' read -r major minor patch <<< "$current_version"
 
-# Bump
 case "$bump" in
   major) new_version="$((major + 1)).0.0" ;;
   minor) new_version="$major.$((minor + 1)).0" ;;
@@ -69,7 +70,10 @@ with open('plugin.json', 'w') as f:
     f.write('\n')
 "
 
-# Amend the staged changes to include the version bump
+# Amend the commit to include the version bump
+export DEVTEAM_BUMPING=1
 git add plugin.json
+git commit --amend --no-edit --no-verify
+unset DEVTEAM_BUMPING
 
-echo "📦 Version: $current_version → $new_version ($bump bump from commit prefix)"
+echo "📦 Version: $current_version → $new_version ($bump)"
