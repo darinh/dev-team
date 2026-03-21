@@ -117,7 +117,7 @@ if [ -f plugin.json ]; then
 
   for sf in $staged_files; do
     case "$sf" in
-      agents/*|protocols/*|skills/*|plugin.json) plugin_changed=true ;;
+      agents/*|protocols/*|skills/*|.githooks/*|plugin.json) plugin_changed=true ;;
     esac
   done
 
