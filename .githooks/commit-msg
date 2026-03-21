@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# dev-team commit-msg hook
+# Reads the commit message and bumps plugin.json version based on
+# Conventional Commits convention:
+#   feat!: or BREAKING CHANGE → major
+#   feat:                      → minor
+#   fix: docs: chore: refactor: → patch
+#
+# Only bumps if plugin content (agents/, protocols/, skills/, .githooks/)
+# is in the staged changes. Pure .team/ or docs-only commits don't bump.
+#
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+[ -f plugin.json ] || exit 0
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Check if any plugin content changed
+staged_files=$(git diff --cached --name-only 2>/dev/null || true)
+plugin_changed=false
+
+for sf in $staged_files; do
+  case "$sf" in
+    agents/*|protocols/*|skills/*|.githooks/*) plugin_changed=true ;;
+  esac
+done
+
+[ "$plugin_changed" = true ] || exit 0
+
+# Determine bump type from commit message
+bump="none"
+
+# Check for breaking change (major)
+if echo "$commit_msg" | head -1 | grep -qE '^[a-z]+!:'; then
+  bump="major"
+elif echo "$commit_msg" | grep -q 'BREAKING CHANGE'; then
+  bump="major"
+# Check for feat (minor)
+elif echo "$commit_msg" | head -1 | grep -qE '^feat(\(.+\))?:'; then
+  bump="minor"
+# Check for fix, docs, chore, refactor (patch)
+elif echo "$commit_msg" | head -1 | grep -qE '^(fix|docs|chore|refactor|style|perf|test|ci|build)(\(.+\))?:'; then
+  bump="patch"
+fi
+
+[ "$bump" != "none" ] || exit 0
+
+# Read current version
+current_version=$(python3 -c "import json; print(json.load(open('plugin.json'))['version'])" 2>/dev/null || echo "0.0.0")
+IFS='.' read -r major minor patch <<< "$current_version"
+
+# Bump
+case "$bump" in
+  major) new_version="$((major + 1)).0.0" ;;
+  minor) new_version="$major.$((minor + 1)).0" ;;
+  patch) new_version="$major.$minor.$((patch + 1))" ;;
+esac
+
+# Update plugin.json
+python3 -c "
+import json
+d = json.load(open('plugin.json'))
+d['version'] = '$new_version'
+with open('plugin.json', 'w') as f:
+    json.dump(d, f, indent=2)
+    f.write('\n')
+"
+
+# Amend the staged changes to include the version bump
+git add plugin.json
+
+echo "📦 Version: $current_version → $new_version ($bump bump from commit prefix)"

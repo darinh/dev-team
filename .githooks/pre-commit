@@ -109,34 +109,6 @@ else
   errors=$((errors + proto_errors))
 fi
 
-# --- 5. Auto Version Bump ---
-# Bump patch version in plugin.json if any plugin content changed
-if [ -f plugin.json ]; then
-  staged_files=$(git diff --cached --name-only 2>/dev/null || true)
-  plugin_changed=false
-
-  for sf in $staged_files; do
-    case "$sf" in
-      agents/*|protocols/*|skills/*|.githooks/*|plugin.json) plugin_changed=true ;;
-    esac
-  done
-
-  if [ "$plugin_changed" = true ]; then
-    current_version=$(python3 -c "import json; print(json.load(open('plugin.json'))['version'])" 2>/dev/null || echo "0.0.0")
-    IFS='.' read -r major minor patch <<< "$current_version"
-    new_version="$major.$minor.$((patch + 1))"
-    python3 -c "
-import json
-d = json.load(open('plugin.json'))
-d['version'] = '$new_version'
-json.dump(d, open('plugin.json','w'), indent=2)
-print()  # trailing newline
-" 2>/dev/null
-    git add plugin.json
-    echo "  📦 Version bump: $current_version → $new_version"
-  fi
-fi
-
 # --- Result ---
 echo ""
 if [ $errors -eq 0 ]; then
