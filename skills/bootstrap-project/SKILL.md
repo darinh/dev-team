@@ -15,11 +15,12 @@ Initialize a new project for dev-team. Creates the `.team/` directory with all s
 mkdir -p .team/protocols \
          .team/memory \
          .team/skills \
+         .team/audit/sessions \
          .team/knowledge/upstream-proposals \
          .team/knowledge/retrospectives \
          .team/knowledge/projects
 
-for dir in .team/memory .team/skills .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects; do
+for dir in .team/memory .team/skills .team/audit/sessions .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects; do
   touch "$dir/.gitkeep"
 done
 ```
@@ -152,11 +153,49 @@ team:
         - "Failure pattern analysis"
         - "Retrospective facilitation"
 
+    - name: "auditor"
+      role: "Auditor"
+      domain: "Session audit, protocol compliance verification, handoff integrity"
+      reports_to: null
+      status: active
+      skills:
+        - "Audit log parsing and event chain reconstruction"
+        - "Protocol compliance verification"
+        - "Handoff integrity checking"
+        - "Customer intent traceability"
+
   divisions: []
   v_teams: []
 ```
 
-### 5. Create `.team/knowledge/failures.md`
+### 5. Create `.team/audit/index.md`
+
+```markdown
+# Audit Session Index
+
+| Date | Session File | Tasks Reviewed | Overall | Summary |
+|------|-------------|----------------|---------|---------|
+```
+
+### 6. Copy audit protocol
+
+```bash
+if [ -n "$PLUGIN_DIR" ] && [ -f "$PLUGIN_DIR/protocols/audit.md" ]; then
+  cp "$PLUGIN_DIR/protocols/audit.md" .team/protocols/audit.md
+else
+  cat > .team/protocols/audit.md << 'EOF'
+# Audit Protocol
+
+See the full protocol in the dev-team plugin: https://github.com/darinh/dev-team/tree/main/protocols/audit.md
+
+Install or update the plugin to get the latest protocols:
+  copilot plugin install darinh/dev-team
+  copilot plugin update dev-team
+EOF
+fi
+```
+
+### 7. Create `.team/knowledge/failures.md`
 
 ```markdown
 # Failure Journal
@@ -167,7 +206,7 @@ See `.team/protocols/retrospective.md` for the format and rules.
 <!-- Entries below this line. Do not edit or delete existing entries. -->
 ```
 
-### 6. Copy AGENTS.md
+### 8. Copy AGENTS.md
 
 Copy the plugin's `AGENTS.md` to the project root:
 
@@ -186,7 +225,7 @@ All agents in this project follow the shared protocols in `.team/protocols/`.
 See the full instructions in the dev-team plugin: https://github.com/darinh/dev-team
 ```
 
-### 7. Commit
+### 9. Commit
 
 ```bash
 git add .team/ AGENTS.md
@@ -198,7 +237,7 @@ Project: {project-name} | Stack: {stack}
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ```
 
-### 8. Report Success
+### 10. Report Success
 
 Tell the user: "✅ Project initialized! Your dev-team is ready."
 Then proceed with team assessment and next-step options.

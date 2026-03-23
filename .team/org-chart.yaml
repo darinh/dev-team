@@ -99,6 +99,71 @@ team:
         - "Retrospective facilitation"
         - "Upstream contribution management"
 
+    - name: "auditor"
+      role: "Auditor"
+      domain: "Session audit, protocol compliance verification, handoff integrity"
+      reports_to: null  # Auditor serves the team and user independently
+      status: active
+      created: "2026-03-23"
+      skills:
+        - "Audit log parsing and event chain reconstruction"
+        - "Protocol compliance verification"
+        - "Handoff integrity checking"
+        - "Customer intent traceability"
+        - "Session summary reporting"
+
+    - name: "ui-engineer"
+      role: "UI Engineer"
+      domain: "React components, frontend pages, accessibility, component testing"
+      reports_to: null
+      status: active
+      created: "2026-03-23"
+      skills:
+        - "React 18+ with TypeScript"
+        - "Accessibility (WCAG 2.1 AA)"
+        - "Component testing (React Testing Library)"
+        - "CSS and design systems"
+        - "Frontend performance optimization"
+
+    - name: "api-engineer"
+      role: "API Engineer"
+      domain: "REST/GraphQL/gRPC API design and implementation, authentication, validation"
+      reports_to: null
+      status: active
+      created: "2026-03-23"
+      skills:
+        - "REST API design and HTTP semantics"
+        - "Input validation and sanitization"
+        - "Authentication and authorization middleware"
+        - "OpenAPI documentation"
+        - "API integration testing"
+
+    - name: "qa-engineer"
+      role: "QA Engineer"
+      domain: "Test strategy, E2E automation, coverage analysis, handoff verification"
+      reports_to: null
+      status: active
+      created: "2026-03-23"
+      skills:
+        - "E2E automation with Playwright"
+        - "Test strategy design"
+        - "Handoff claim verification"
+        - "Edge case and boundary analysis"
+        - "Coverage gap identification"
+
+    - name: "security-analyst"
+      role: "Security Analyst"
+      domain: "Security review, threat modeling, dependency auditing, adversarial review for red tasks"
+      reports_to: null
+      status: active
+      created: "2026-03-23"
+      skills:
+        - "OWASP Top 10 vulnerability analysis"
+        - "Auth and authorization review"
+        - "Dependency vulnerability auditing"
+        - "Secrets detection"
+        - "Threat modeling"
+
   # Organizational divisions (created by Hiring Manager when team grows)
   # Each division has:
   #   name:       Division name

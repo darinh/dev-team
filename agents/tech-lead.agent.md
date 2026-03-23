@@ -71,6 +71,7 @@ Before starting any task, read and follow these shared protocols:
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
 - **Retrospective**: `.team/protocols/retrospective.md` (you are the primary driver of this protocol)
+- **Audit**: `.team/protocols/audit.md` (you review audit log compliance during health checks)
 
 ### Memory
 Your persistent memory file is at `.team/memory/tech-lead.md`.
@@ -133,7 +134,38 @@ for f in agents/*.agent.md; do
   memory=$(grep -c "memory.md" "$f")
   skill=$(grep -c "skill-acquisition.md" "$f")
   retro=$(grep -c "retrospective.md" "$f")
-  echo "$name: collab=$collab memory=$memory skill=$skill retro=$retro"
+  audit=$(grep -c "audit.md" "$f")
+  echo "$name: collab=$collab memory=$memory skill=$skill retro=$retro audit=$audit"
+done
+```
+
+### 6. Audit Log Compliance Check
+```bash
+# Verify audit session files exist
+ls -la .team/audit/sessions/*.jsonl 2>/dev/null || echo "WARNING: No audit session files found"
+
+# Check for tasks missing required adversarial reviews
+# (red tasks must have 3 adversarial_review entries)
+for session in .team/audit/sessions/*.jsonl; do
+  echo "=== $session ==="
+  # Get all red task IDs
+  red_tasks=$(jq -r 'select(.type == "task_created" and .risk_level == "red") | .task_id' "$session" 2>/dev/null)
+  for task_id in $red_tasks; do
+    review_count=$(jq -r --arg tid "$task_id" 'select(.type == "adversarial_review" and .task_id == $tid) | .id' "$session" 2>/dev/null | wc -l)
+    echo "Task $task_id (red): $review_count/3 adversarial reviews"
+    if [ "$review_count" -lt 3 ]; then
+      echo "  WARNING: Insufficient adversarial reviews for red task $task_id"
+    fi
+  done
+
+  # Check for unverified handoffs
+  handoff_ids=$(jq -r 'select(.type == "handoff") | .id' "$session" 2>/dev/null)
+  for hid in $handoff_ids; do
+    verified=$(jq -r --arg id "$hid" 'select(.type == "handoff_verification" and .handoff_event_id == $id) | .id' "$session" 2>/dev/null)
+    if [ -z "$verified" ]; then
+      echo "  WARNING: Unverified handoff $hid"
+    fi
+  done
 done
 ```
 
@@ -157,8 +189,12 @@ Present health check results as a structured report:
 {Memory files with no recent updates, pending proposals}
 
 ### Protocol Compliance
-| Agent | Collaboration | Memory | Skill Acq | Retrospective |
-|-------|--------------|--------|-----------|---------------|
+| Agent | Collaboration | Memory | Skill Acq | Retrospective | Audit |
+|-------|--------------|--------|-----------|---------------|-------|
+
+### Audit Log Compliance
+| Session | Red Tasks | Reviews (required/found) | Unverified Handoffs | Status |
+|---------|-----------|--------------------------|--------------------|----|
 
 ### Recommendations
 {Specific, actionable recommendations based on findings}

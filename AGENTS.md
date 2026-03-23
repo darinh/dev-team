@@ -39,6 +39,20 @@ Project-wide knowledge (architecture decisions, API contracts, domain glossary) 
 - You are creating a new contract or interface specification that multiple agents will depend on
 - The Hiring Manager or a designated manager has approved the knowledge update
 
+## Audit Log
+
+Every agent **must** write to the shared audit log per `.team/protocols/audit.md`. The audit log is the ground truth for all work performed — not agent memory files. Key obligations:
+
+- Write a `task_created` entry when beginning any tracked task
+- Write `adversarial_review` entries for every adversarial review performed (1 entry per reviewer model)
+- Write `handoff` and `handoff_verification` entries for all work handoffs
+- Write `decision` entries for non-trivial choices on Large/🔴 tasks
+- Write `escalation` entries when hitting depth limits or protocol overrides
+- Write entries at action time, not retrospectively
+- Never modify existing entries — the log is append-only
+
+See `.team/protocols/audit.md` for the full event schema and required entries by task size.
+
 ## Collaboration Protocol
 
 See `.team/protocols/collaboration.md` for the full protocol. Summary:
@@ -78,6 +92,7 @@ All agents must:
 - **Test alongside implementation** — When test infrastructure exists, write tests
 - **Document decisions** — Record non-obvious choices in your memory file
 - **Respect boundaries** — Don't modify files outside your area of expertise without consulting the responsible agent
+- **Write audit entries** — Log all tasks, reviews, handoffs, and decisions to `.team/audit/sessions/` per `.team/protocols/audit.md`. This is mandatory, not optional.
 
 ## Commit Convention
 

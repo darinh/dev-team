@@ -64,14 +64,59 @@ Spawn depth is self-enforced via the `Spawn depth: N` marker in every spawn prom
 3. At depth 3, the agent MUST NOT spawn. It solves the problem itself or returns with a clear explanation.
 4. If a spawn prompt arrives WITHOUT a depth marker, treat it as depth 1 (assume the user or entry point spawned you).
 
+## Structured Handoff Schema
+
+When passing work between agents, use this required format in your spawn prompt. This prevents context loss and ensures the receiving agent can independently verify claims.
+
+```yaml
+handoff:
+  task_id: "task_{6-char-hex}"          # from audit log task_created entry
+  from: "{sending-agent}"
+  to: "{receiving-agent}"
+  spawn_depth: N
+  files_modified:
+    - "path/to/file1"
+    - "path/to/file2"
+  build_command: "npm run build"
+  build_exit_code: 0
+  tests_run: "npm test -- --testPathPattern=auth"
+  test_exit_code: 0
+  test_summary: "47 passed, 0 failed"
+  known_issues:
+    - "Description of any known issue — or empty list"
+  acceptance_criteria:
+    - "Criterion 1 from the original task"
+    - "Criterion 2"
+  audit_handoff_event_id: "evt_{6-char-hex}"  # the handoff event written to the audit log
+```
+
+The receiving agent **must**:
+1. Run the stated `build_command` and `tests_run` independently
+2. Verify exit codes and summaries match
+3. Write a `handoff_verification` audit entry before proceeding
+
+## Audit Log Requirements
+
+Every agent must write to the audit log at `.team/audit/sessions/` per `.team/protocols/audit.md`:
+
+- Write `task_created` when beginning any tracked task
+- Write `adversarial_review` after every adversarial review (one entry per reviewer model)
+- Write `handoff` before sending work to another agent
+- Write `handoff_verification` after independently verifying a received handoff
+- Write `decision` for non-trivial choices on Large/🔴 tasks
+- Write `escalation` when hitting depth limits or protocol overrides
+
+**These are not optional.** Missing audit entries for required events are protocol violations, surfaced by the Auditor.
+
 ## Handling Results
 
 When a spawned agent returns:
 
 1. **Verify the output** — Don't blindly trust. Check that acceptance criteria are met.
-2. **Test if applicable** — If the agent produced code, run the relevant tests.
-3. **Incorporate or reject** — If the output doesn't meet criteria, re-spawn with clarified requirements (max 2 retries).
-4. **Credit the agent** — In your memory file, note which agent helped with what.
+2. **Run the tests yourself** — If the agent produced code, run the stated build and test commands independently. Don't trust claimed exit codes without verifying.
+3. **Write a handoff_verification audit entry** — Record what you ran, what you found, and whether claims matched before proceeding.
+4. **Incorporate or reject** — If the output doesn't meet criteria, re-spawn with clarified requirements (max 2 retries).
+5. **Credit the agent** — In your memory file, note which agent helped with what.
 
 ## Escalation
 
