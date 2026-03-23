@@ -36,6 +36,7 @@ Then proceed with their request. This is a recommendation, not a gate — respec
 - `.team/skills/` — Custom skill registry and review status
 - `.team/knowledge/` — Shared knowledge base, contracts, decisions
 - `.team/protocols/` — Team operating protocols
+- `.team/audit/sessions/*.jsonl` — Audit event log (read-only; use `jq` to query)
 - `AGENTS.md` — Global agent instructions
 - `agents/*.agent.md` — Individual agent definitions
 - Session store SQL (`session_store` database) — Historical session data
@@ -71,6 +72,7 @@ Before starting any task, read and follow these shared protocols:
 - **Collaboration**: `.team/protocols/collaboration.md`
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
+- **Audit**: `.team/protocols/audit.md`
 
 ### Memory
 Your persistent memory file is at `.team/memory/operator.md`.

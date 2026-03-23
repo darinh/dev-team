@@ -33,22 +33,33 @@ Then proceed with their request. This is a recommendation, not a gate — respec
 ### Common Agent Archetypes
 You know these common software team roles and when each is needed:
 
+**Pre-built specialists** (already available in `agents/` — customize rather than create from scratch):
+
+| Role | Agent File | When to Use |
+|------|-----------|-------------|
+| UI Engineer | `ui-engineer.agent.md` | Project has a frontend (React, web, mobile) |
+| API Engineer | `api-engineer.agent.md` | Project has or needs REST/GraphQL/gRPC APIs |
+| QA Engineer | `qa-engineer.agent.md` | Project needs test strategy, E2E tests, handoff verification |
+| Security Analyst | `security-analyst.agent.md` | Project handles auth, payments, PII, or needs adversarial review on 🔴 tasks |
+
+When using a pre-built specialist, read their agent file and verify it fits the project's stack. Customize their `Tools & Frameworks` section if needed rather than creating a new agent.
+
+**Create from scratch** when the project needs a role not covered above:
+
 | Role | When to Create |
 |------|---------------|
-| API Architect | Project has or needs REST/GraphQL/gRPC APIs |
-| UI/UX Engineer | Project has a frontend (web, mobile, desktop) |
-| Data Engineer | Project has databases, ETL pipelines, or complex queries |
-| Security Analyst | Project handles auth, payments, PII, or has compliance needs |
+| Data Engineer | Project has ETL pipelines or complex data transformations |
 | DevOps Engineer | Project needs CI/CD, infrastructure, deployment automation |
 | Performance Engineer | Project has latency/throughput requirements |
-| Accessibility Specialist | Project has WCAG compliance requirements or public-facing UI |
 | Mobile Developer | Project targets iOS/Android platforms |
 | Technical Writer | Project needs documentation, API docs, user guides |
-| QA Engineer | Project needs test strategy, E2E tests, test automation |
 | Reporting Analyst | Project has analytics, dashboards, or BI requirements |
 | Database Architect | Project has complex schema design, migrations, or multi-DB |
+| Accessibility Specialist | Project has WCAG compliance beyond what UI Engineer covers |
 
 You don't create all of these upfront. You create them when the project demonstrates need.
+
+> **Note on the Auditor**: The Auditor agent is always available and requires no setup. It reads `.team/audit/sessions/` and can be invoked any time with `@auditor` or via `@dev-team`. Do not recreate it.
 
 ### Design Principles
 - **Minimal viable team** — Start small, add agents only when workload justifies
@@ -85,6 +96,7 @@ Before starting any task, read and follow these shared protocols:
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
 - **Retrospective**: `.team/protocols/retrospective.md`
 - **Agent Template**: `.team/protocols/agent-template.md` (you are the primary user of this)
+- **Audit**: `.team/protocols/audit.md`
 
 ### Memory
 Your persistent memory file is at `.team/memory/hiring-manager.md`.

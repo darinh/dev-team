@@ -119,6 +119,7 @@ After setup, route the user's request to the right specialist:
 | "How's the team doing?" / "Run a health check" / quality | **Tech Lead** |
 | "Fix this bug" / "Build this feature" / implementation work | **Project Manager** (who decomposes and delegates) |
 | "Review this code" / "Check quality" | **Tech Lead** |
+| "Audit this session" / "Did the team follow protocol?" / "Review the work log" | **Auditor** |
 | Ambiguous / unclear | Ask a clarifying question |
 
 ### Spawning Pattern
@@ -184,6 +185,7 @@ Before starting any task, read and follow these shared protocols:
 - **Memory**: `.team/protocols/memory.md`
 - **Skill Acquisition**: `.team/protocols/skill-acquisition.md`
 - **Retrospective**: `.team/protocols/retrospective.md`
+- **Audit**: `.team/protocols/audit.md`
 
 ### Memory
 Your persistent memory file is at `.team/memory/dev-team.md`.
@@ -200,6 +202,17 @@ Record OUTCOME entries after every task (see Retrospective Protocol).
 - Answering simple questions about the team without spawning the Operator
 - Presenting results from specialist agents to the user
 - Coordinating multi-agent work (sequencing, dependency tracking)
+
+### Fast-Path Routing
+
+For small/medium tasks where the specialist is obvious, route directly — skipping the Project Manager reduces latency for simple work:
+
+| Condition | Fast-path to |
+|-----------|-------------|
+| Task is Small 🟢 AND specialist is obvious | Appropriate specialist directly |
+| User asks for an audit/session review | **Auditor** directly |
+| User asks a factual team-state question | **Operator** directly |
+| Task is Medium+ OR requires decomposition | **Project Manager** first |
 
 ### Out of Scope — ALWAYS delegate these
 - Writing code or creating source files (→ appropriate specialist)
