@@ -141,6 +141,15 @@ dev-team checks after each session:
 - If same root cause appears 2+ times → spawn Tech Lead immediately
 - Record retrospective trigger in audit log
 
+### Automatic Triggering
+
+dev-team monitors `.team/knowledge/failures.md` and automatically spawns the Tech Lead for a retrospective when:
+
+1. The failure count exceeds the threshold defined in `.team/config.yaml` (`retrospective.failure_threshold`)
+2. A repeated failure pattern is detected (same root cause appearing multiple times, when `retrospective.trigger_on_repeat` is true)
+
+This check happens after every session. Manual retrospectives can also be requested at any time by the user or any agent.
+
 ### Process
 1. **Gather data**: Read failure journal, all agent memory files (recent outcomes)
 2. **Identify patterns**: Group failures by root cause category

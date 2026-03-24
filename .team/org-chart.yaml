@@ -1,182 +1,39 @@
 # Dev-Team Organizational Structure
 #
-# This file defines the team hierarchy, agent roles, and organizational relationships.
-# All agents read this file to discover who to collaborate with.
+# This org-chart is for the PLUGIN REPO only.
+# In projects, bootstrap-project creates a full org-chart with core agents.
+# Specialist agents are added by the Hiring Manager on demand.
 #
 # Maintained by: hiring-manager (sole writer)
-# Queryable by: operator (can read and report on this structure)
 # Readable by: all agents
-#
-# Schema:
-#   team.name          - Team name
-#   team.operator      - The operator agent (truth-only query interface)
-#   team.hiring_manager - The hiring manager agent (team builder)
-#   team.agents[]      - Flat list of all agents with metadata
-#   team.divisions[]   - Organizational groupings (created when needed)
-#   team.v_teams[]     - Cross-functional virtual teams (formed organically)
 
 team:
   name: "Dev Team"
-  version: 1
-
-  # Core agents (always present)
+  version: 2
   operator: "operator"
   hiring_manager: "hiring-manager"
   project_manager: "project-manager"
 
-  # All agents in the team
-  # Each agent entry contains:
-  #   name:        Agent file name (without .agent.md)
-  #   role:        Human-readable role title
-  #   domain:      Primary expertise domain
-  #   reports_to:  Manager agent name (or null for top-level)
-  #   status:      active | probationary | inactive | deprecated
-  #   created:     ISO date when the agent was created
-  #   skills:      List of key skills/competencies
   agents:
     - name: "dev-team"
-      role: "Dev-Team Concierge"
-      domain: "Entry point, project setup, request routing"
-      reports_to: null  # Entry point — serves the user directly
-      status: active
-      created: "2026-03-20"
-      skills:
-        - "Project setup and onboarding"
-        - "Request routing to specialists"
-        - "Codebase analysis"
-
-    - name: "operator"
-      role: "Operator"
-      domain: "Team operations and state queries"
-      reports_to: null  # Operator reports to no one — it serves the user
-      status: active
-      created: "2026-03-19"
-      skills:
-        - "Cross-agent state queries"
-        - "Memory search and aggregation"
-        - "Org chart navigation"
-        - "Truth-verified reporting"
-
-    - name: "project-manager"
-      role: "Project Manager"
-      domain: "Requirements, planning, brainstorming, project coordination"
-      reports_to: null  # Project Manager reports to the user
-      status: active
-      created: "2026-03-19"
-      skills:
-        - "Requirements elicitation and documentation"
-        - "Product thinking and MVP scoping"
-        - "Project decomposition and planning"
-        - "Brainstorming facilitation"
-        - "Stakeholder communication"
-        - "Cross-agent work coordination"
-
-    - name: "hiring-manager"
-      role: "Hiring Manager"
-      domain: "Agent creation, onboarding, team structure, skill marketplace"
-      reports_to: "project-manager"  # PM instructs HM to build teams
-      status: active
-      created: "2026-03-19"
-      skills:
-        - "Agent design and creation"
-        - "External agent onboarding and interview"
-        - "Organizational structure management"
-        - "Skill gap analysis"
-        - "Adversarial review coordination"
-        - "Workforce planning"
-
-    - name: "tech-lead"
-      role: "Tech Lead"
-      domain: "Work quality, team health, retrospectives, agent probation, framework improvements"
-      reports_to: null  # Tech Lead serves the team, not a manager
-      status: active
-      created: "2026-03-19"
-      skills:
-        - "Work quality assessment"
-        - "Failure pattern analysis"
-        - "Protocol design and refinement"
-        - "Agent probation management"
-        - "Retrospective facilitation"
-        - "Upstream contribution management"
-
-    - name: "auditor"
-      role: "Auditor"
-      domain: "Session audit, protocol compliance verification, handoff integrity"
-      reports_to: null  # Auditor serves the team and user independently
-      status: active
-      created: "2026-03-23"
-      skills:
-        - "Audit log parsing and event chain reconstruction"
-        - "Protocol compliance verification"
-        - "Handoff integrity checking"
-        - "Customer intent traceability"
-        - "Session summary reporting"
-
-    - name: "ui-engineer"
-      role: "UI Engineer"
-      domain: "React components, frontend pages, accessibility, component testing"
+      role: "Dev-Team Concierge & Enforcer"
+      domain: "Project setup, request routing, coordination enforcement"
       reports_to: null
       status: active
-      created: "2026-03-23"
+      created: "2025-03-18"
       skills:
-        - "React 18+ with TypeScript"
-        - "Accessibility (WCAG 2.1 AA)"
-        - "Component testing (React Testing Library)"
-        - "CSS and design systems"
-        - "Frontend performance optimization"
+        - "Project initialization"
+        - "Intent detection and routing"
+        - "Coordination enforcement"
+        - "Audit entry management"
 
-    - name: "api-engineer"
-      role: "API Engineer"
-      domain: "REST/GraphQL/gRPC API design and implementation, authentication, validation"
-      reports_to: null
-      status: active
-      created: "2026-03-23"
-      skills:
-        - "REST API design and HTTP semantics"
-        - "Input validation and sanitization"
-        - "Authentication and authorization middleware"
-        - "OpenAPI documentation"
-        - "API integration testing"
+  # Core agents (project-manager, hiring-manager, tech-lead, operator, auditor)
+  # are created per-project from templates/ during bootstrap.
+  # They appear in each project's .team/org-chart.yaml, not here.
 
-    - name: "qa-engineer"
-      role: "QA Engineer"
-      domain: "Test strategy, E2E automation, coverage analysis, handoff verification"
-      reports_to: null
-      status: active
-      created: "2026-03-23"
-      skills:
-        - "E2E automation with Playwright"
-        - "Test strategy design"
-        - "Handoff claim verification"
-        - "Edge case and boundary analysis"
-        - "Coverage gap identification"
+  # Specialist agents (api-engineer, ui-engineer, qa-engineer, security-analyst)
+  # are created on-demand by the Hiring Manager from .team/templates/.
+  # They appear in each project's .team/org-chart.yaml when created.
 
-    - name: "security-analyst"
-      role: "Security Analyst"
-      domain: "Security review, threat modeling, dependency auditing, adversarial review for red tasks"
-      reports_to: null
-      status: active
-      created: "2026-03-23"
-      skills:
-        - "OWASP Top 10 vulnerability analysis"
-        - "Auth and authorization review"
-        - "Dependency vulnerability auditing"
-        - "Secrets detection"
-        - "Threat modeling"
-
-  # Organizational divisions (created by Hiring Manager when team grows)
-  # Each division has:
-  #   name:       Division name
-  #   manager:    Manager agent name
-  #   members:    List of agent names in this division
-  #   focus:      What this division is responsible for
   divisions: []
-
-  # Cross-functional virtual teams (formed and dissolved as needed)
-  # Each v-team has:
-  #   name:       V-team name
-  #   purpose:    What this v-team is working on
-  #   lead:       Agent leading the v-team
-  #   members:    List of agent names
-  #   status:     active | completed | dissolved
   v_teams: []

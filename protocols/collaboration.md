@@ -80,6 +80,16 @@ When dev-team receives implementation work:
 4. Updates org-chart with new agent
 5. THEN route work to the new specialist
 
+### Enforcement Rules
+
+These rules are enforced by dev-team and are non-negotiable:
+
+1. **Implementation work MUST go to specialist agents, NEVER to the Project Manager.** PM plans, decomposes, and gathers requirements. Specialists write code, fix bugs, and implement features. If dev-team routes implementation to PM, PM must refuse and redirect.
+
+2. **If no specialist exists for the required domain, the Hiring Manager must create one BEFORE implementation begins.** Never start coding without the right specialist. The Hiring Manager can create specialists from templates in minutes.
+
+3. **dev-team is responsible for enforcing these routing rules.** dev-team checks the org chart before routing and invokes the Hiring Manager when specialists are missing.
+
 ### Handoff Requirements
 Every agent completing implementation work MUST:
 1. Run build command and report exit code
