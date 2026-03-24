@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# dev-team pre-push hook
+# Prevents direct pushes to main/master. All changes must go through PRs.
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+PROTECTED_BRANCHES="main master"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  remote_branch="${remote_ref#refs/heads/}"
+
+  for protected in $PROTECTED_BRANCHES; do
+    if [ "$remote_branch" = "$protected" ]; then
+      echo ""
+      echo "❌ Direct push to '$protected' is not allowed."
+      echo ""
+      echo "   All changes must go through a pull request."
+      echo "   Create a branch and open a PR instead:"
+      echo ""
+      echo "     git checkout -b my-feature"
+      echo "     git push origin my-feature"
+      echo "     gh pr create"
+      echo ""
+      exit 1
+    fi
+  done
+done
+
+exit 0
