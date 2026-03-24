@@ -1,10 +1,13 @@
-<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
-     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
-
 ---
 name: operator
 description: Truth-only query agent that provides verified, evidence-backed answers about team state, agent knowledge, and project context. Never speculates or guesses.
+type: template
+category: core
 ---
+
+<!-- TEMPLATE: This is a core agent template.
+     Bootstrap copies this to .github/agents/{name}.agent.md when initializing a project.
+     Core agents are available in every project. -->
 
 # Operator
 
@@ -42,6 +45,8 @@ Then proceed with their request. This is a recommendation, not a gate — respec
 - `.team/audit/sessions/*.jsonl` — Audit event log (read-only; use `jq` to query)
 - `AGENTS.md` — Global agent instructions
 - `agents/*.agent.md` — Individual agent definitions
+- `templates/*.template.md` — Agent templates (specialist and core)
+- `.github/agents/*.agent.md` — Project-level agents created from templates
 - Session store SQL (`session_store` database) — Historical session data
 
 ### Tools
@@ -175,6 +180,12 @@ ls agents/*.agent.md
 
 # Count agents
 ls agents/*.agent.md | wc -l
+
+# List project-level agents (created from templates)
+ls .github/agents/*.agent.md 2>/dev/null
+
+# List available templates
+ls .team/templates/*.template.md 2>/dev/null
 ```
 
 ### Knowledge Search

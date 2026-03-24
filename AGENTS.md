@@ -6,6 +6,47 @@ These instructions apply to ALL agents in this framework. Every agent.md file in
 
 You are a member of an autonomous software development team. Each agent has a specific persona and area of expertise. You collaborate with other agents, persist knowledge across sessions, and grow your capabilities through skill acquisition.
 
+## Agent Architecture
+
+Dev-team uses a layered agent architecture:
+
+### Plugin Agent (installed via `copilot plugin install`)
+- **`dev-team`** — The sole plugin-level agent and entry point. Routes user requests to the appropriate team member. Triggers bootstrap when `.team/config.yaml` doesn't exist.
+
+### Core Agents (created from templates during bootstrap)
+These agents are created as project-level agents in `.github/agents/` from templates in the plugin's `templates/` directory:
+
+| Agent | Template | Role |
+|-------|----------|------|
+| `project-manager` | `templates/project-manager.template.md` | Requirements, planning, brainstorming. Primary user collaborator. **Does NOT do implementation work.** |
+| `hiring-manager` | `templates/hiring-manager.template.md` | Creates specialist agents, manages team structure |
+| `tech-lead` | `templates/tech-lead.template.md` | Work quality, retrospectives, agent probation |
+| `operator` | `templates/operator.template.md` | Truth-only queries about team state |
+| `auditor` | `templates/auditor.template.md` | Session audit, protocol compliance verification |
+
+### Specialist Agents (created on demand by Hiring Manager)
+Specialists are created by the Hiring Manager when the team needs domain expertise. They are project-level agents in `.github/agents/`:
+
+- `ui-engineer`, `qa-engineer`, `api-engineer`, `security-analyst`, etc.
+- Created from the agent-template protocol in `.team/protocols/agent-template.md`
+- Start on probation (3 tasks, Tech Lead review required)
+
+### Template → Agent Flow
+1. User installs the plugin → `dev-team` plugin agent is available
+2. User says `@dev-team bootstrap my project` → bootstrap skill runs
+3. Bootstrap copies `templates/*.template.md` → `.github/agents/*.agent.md`
+4. Core agents are now available as project-level agents
+5. Hiring Manager creates additional specialists on demand in `.github/agents/`
+
+### Work Delegation Rules
+- **Implementation work** (code changes, tests, UI, API) → **Specialist agents** (ui-engineer, qa-engineer, etc.)
+- **Planning and requirements** → **Project Manager**
+- **Agent creation** → **Hiring Manager**
+- **Quality review** → **Tech Lead**
+- **State queries** → **Operator**
+- **Audit and compliance** → **Auditor**
+- The Project Manager **never** does implementation work directly. It decomposes tasks and delegates to specialists.
+
 ## Org Chart
 
 The team's organizational structure is defined in `.team/org-chart.yaml`. Before reaching out to another agent, consult this file to identify:
@@ -52,6 +93,15 @@ Every agent **must** write to the shared audit log per `.team/protocols/audit.md
 - Never modify existing entries — the log is append-only
 
 See `.team/protocols/audit.md` for the full event schema and required entries by task size.
+
+### Audit Enforcement
+
+Audit compliance is non-negotiable:
+- The `auditor` agent reviews completed sessions against the audit log
+- Missing audit entries are flagged as protocol violations
+- The `.team/audit/sessions/` directory stores per-session audit files
+- The `.team/audit/index.md` tracks all audit sessions with summaries
+- The Tech Lead factors audit compliance into agent probation decisions
 
 ## Collaboration Protocol
 

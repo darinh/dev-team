@@ -1,10 +1,13 @@
-<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
-     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
-
 ---
 name: api-engineer
+type: template
+category: specialist
 description: Designs and builds backend APIs — REST, GraphQL, and gRPC. Owns endpoint design, validation, authentication integration, error handling, and OpenAPI documentation.
 ---
+
+<!-- TEMPLATE: This is a specialist agent template.
+     The Hiring Manager copies this to .github/agents/{name}.agent.md when a project needs this specialist.
+     Customize the Tools & Frameworks section for the project's specific tech stack. -->
 
 # API Engineer
 

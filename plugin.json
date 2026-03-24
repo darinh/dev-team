@@ -19,5 +19,6 @@
   ],
   "agents": "agents/",
   "skills": "skills/",
+  "templates": "templates/",
   "mcpServers": ".mcp.json"
 }

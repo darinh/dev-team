@@ -19,9 +19,10 @@ mkdir -p .team/protocols \
          .team/knowledge/upstream-proposals \
          .team/knowledge/retrospectives \
          .team/knowledge/projects \
+         .team/templates \
          .github/agents
 
-for dir in .team/memory .team/skills .team/audit/sessions .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects; do
+for dir in .team/memory .team/skills .team/audit/sessions .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects .team/templates .github/agents; do
   touch "$dir/.gitkeep"
 done
 ```
@@ -67,18 +68,30 @@ EOF
 done
 ```
 
-### 3. Create Core Agents
+### 3. Copy Core Agent Templates to Project
 
-Copy core agent templates to the project's `.github/agents/` directory:
+Copy core agent templates from the plugin to the project's `.github/agents/` directory. These become the project's active agents.
 
 ```bash
-TEMPLATE_DIR="$PLUGIN_DIR/templates"
-if [ -d "$TEMPLATE_DIR" ]; then
+# Try to find the plugin install directory (same candidates as protocols)
+if [ -n "$PLUGIN_DIR" ] && [ -d "$PLUGIN_DIR/templates" ]; then
+  # Copy core templates as active agents
   for template in project-manager hiring-manager tech-lead operator auditor; do
-    if [ -f "$TEMPLATE_DIR/$template.template.md" ]; then
-      cp "$TEMPLATE_DIR/$template.template.md" ".github/agents/$template.agent.md"
+    if [ -f "$PLUGIN_DIR/templates/${template}.template.md" ]; then
+      # Copy template and rename to .agent.md
+      cp "$PLUGIN_DIR/templates/${template}.template.md" ".github/agents/${template}.agent.md"
     fi
   done
+  
+  # Copy specialist templates to .team/templates/ (for Hiring Manager to use later)
+  for template in api-engineer ui-engineer qa-engineer security-analyst; do
+    if [ -f "$PLUGIN_DIR/templates/${template}.template.md" ]; then
+      cp "$PLUGIN_DIR/templates/${template}.template.md" ".team/templates/${template}.template.md"
+    fi
+  done
+else
+  echo "Plugin templates directory not found — core agents will need to be created manually"
+  echo "Run: copilot plugin update dev-team"
 fi
 ```
 
@@ -122,8 +135,9 @@ The org chart lists `dev-team` as the sole plugin agent. Core agents (project-ma
 
 ```yaml
 # Dev-Team Organizational Structure
+# Core agents created from templates during bootstrap.
+# Specialist agents added by Hiring Manager on demand.
 # Maintained by: hiring-manager (sole writer)
-# Readable by: all agents
 
 team:
   name: "Dev Team"
@@ -208,25 +222,7 @@ team:
 |------|-------------|----------------|---------|---------|
 ```
 
-### 7. Copy audit protocol
-
-```bash
-if [ -n "$PLUGIN_DIR" ] && [ -f "$PLUGIN_DIR/protocols/audit.md" ]; then
-  cp "$PLUGIN_DIR/protocols/audit.md" .team/protocols/audit.md
-else
-  cat > .team/protocols/audit.md << 'EOF'
-# Audit Protocol
-
-See the full protocol in the dev-team plugin: https://github.com/darinh/dev-team/tree/main/protocols/audit.md
-
-Install or update the plugin to get the latest protocols:
-  copilot plugin install darinh/dev-team
-  copilot plugin update dev-team
-EOF
-fi
-```
-
-### 8. Create `.team/knowledge/failures.md`
+### 7. Create `.team/knowledge/failures.md`
 
 ```markdown
 # Failure Journal
@@ -235,6 +231,28 @@ This is an append-only log of significant failures across the team.
 See `.team/protocols/retrospective.md` for the format and rules.
 
 <!-- Entries below this line. Do not edit or delete existing entries. -->
+```
+
+### 8. Verify Critical Files
+
+```bash
+# Verify audit protocol exists
+if [ ! -f ".team/protocols/audit.md" ]; then
+  echo "WARNING: audit.md was not copied. Creating minimal stub."
+  cat > ".team/protocols/audit.md" << 'EOF'
+# Audit Protocol
+
+See the full protocol in the dev-team plugin: https://github.com/darinh/dev-team/tree/main/protocols/audit.md
+EOF
+fi
+
+# Verify at least some core agents exist
+core_count=$(ls .github/agents/*.agent.md 2>/dev/null | wc -l)
+if [ "$core_count" -eq 0 ]; then
+  echo "WARNING: No core agents were copied to .github/agents/"
+  echo "The Hiring Manager and other core agents will not be available."
+  echo "Run: copilot plugin update dev-team"
+fi
 ```
 
 ### 9. Copy AGENTS.md
