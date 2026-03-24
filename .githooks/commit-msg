@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# dev-team commit-msg hook
+# Enforces Conventional Commits format on all commit messages.
+# Install: git config core.hooksPath .githooks
+#
+# Valid prefixes: fix:, feat:, docs:, chore:, refactor:, test:, ci:, style:, perf:, build:
+# Breaking changes: feat!:, fix!:, or BREAKING CHANGE: in body
+# Merge commits and version bumps are exempt.
+
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+FIRST_LINE=$(head -n1 "$COMMIT_MSG_FILE")
+
+# Allow merge commits
+if echo "$FIRST_LINE" | grep -qE '^Merge '; then
+  exit 0
+fi
+
+# Allow version bump commits (from CI)
+if echo "$FIRST_LINE" | grep -qE '^chore: bump version'; then
+  exit 0
+fi
+
+# Allow fixup/squash commits
+if echo "$FIRST_LINE" | grep -qE '^(fixup|squash)! '; then
+  exit 0
+fi
+
+# Validate conventional commit format
+# Pattern: type[(scope)]!?: description
+PATTERN='^(fix|feat|docs|chore|refactor|test|ci|style|perf|build)(\(.+\))?(!)?: .+'
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+  echo ""
+  echo "❌ Commit message does not follow Conventional Commits format."
+  echo ""
+  echo "  Your message:  $FIRST_LINE"
+  echo ""
+  echo "  Required format: <type>[optional scope][!]: <description>"
+  echo ""
+  echo "  Valid types:"
+  echo "    fix:      → patch version bump (bug fix)"
+  echo "    feat:     → minor version bump (new feature)"
+  echo "    feat!:    → major version bump (breaking change)"
+  echo "    docs:     → patch (documentation only)"
+  echo "    chore:    → patch (maintenance)"
+  echo "    refactor: → patch (code restructuring)"
+  echo "    test:     → patch (test changes)"
+  echo "    ci:       → patch (CI/CD changes)"
+  echo "    style:    → patch (formatting, no logic change)"
+  echo "    perf:     → patch (performance improvement)"
+  echo "    build:    → patch (build system changes)"
+  echo ""
+  echo "  Examples:"
+  echo "    feat: add dark mode toggle"
+  echo "    fix(grid): align clues with columns"
+  echo "    feat!: restructure agent architecture"
+  echo "    refactor: move specialists to templates"
+  echo ""
+  exit 1
+fi
+
+exit 0
