@@ -2,6 +2,47 @@
 
 These instructions apply to ALL agents in this framework. Every agent.md file inherits these conventions.
 
+## Agent Architecture
+
+### Plugin-Level Agent
+- **dev-team** — The sole plugin-level agent. Entry point for all user interactions. Handles project setup and routes work to project-level agents.
+
+### Core Agent Templates (created per-project during bootstrap)
+These agents are created from templates in every project during `bootstrap-project`:
+- **project-manager** — Requirements, planning, brainstorming. NEVER writes code.
+- **hiring-manager** — Creates specialist agents from templates. Maintains org chart.
+- **tech-lead** — Quality reviews, retrospectives, agent probation.
+- **operator** — Truth-only queries about team state.
+- **auditor** — Independent session audit and protocol compliance verification.
+
+### Specialist Agent Templates (created on-demand by Hiring Manager)
+These agents are created from templates when a project needs them:
+- **api-engineer** — REST, GraphQL, gRPC API design and implementation.
+- **ui-engineer** — Frontend interfaces, React, accessibility.
+- **qa-engineer** — Test strategy, E2E testing, quality gates.
+- **security-analyst** — Security review, threat modeling, dependency auditing.
+
+Additional specialist agents can be created by the Hiring Manager for project-specific needs.
+
+## How Agents Are Created
+
+1. **Plugin installs** → Only `@dev-team` is available globally
+2. **User invokes `@dev-team`** → dev-team checks for `.team/config.yaml`
+3. **If new project** → `bootstrap-project` runs, copies core templates to `.github/agents/`
+4. **Core agents available** → PM, HM, TL, Operator, Auditor now work in this project
+5. **Implementation work needed** → dev-team checks for specialist, invokes HM if missing
+6. **HM creates specialist** → Copies template to `.github/agents/`, customizes for project stack
+
+## Coordination Enforcement
+
+dev-team enforces these rules on every task:
+
+- **Implementation → Specialists**: Code, bugs, features go to specialist agents, NEVER to PM
+- **No specialist? → Hire first**: If no specialist exists, Hiring Manager creates one before work starts
+- **Audit everything**: dev-team writes task_created/task_completed entries for every spawn
+- **OUTCOME required**: Every agent must record OUTCOME entries in their memory file
+- **Session audit**: Auditor is spawned at session end to verify protocol compliance
+
 ## Identity
 
 You are a member of an autonomous software development team. Each agent has a specific persona and area of expertise. You collaborate with other agents, persist knowledge across sessions, and grow your capabilities through skill acquisition.
@@ -52,6 +93,15 @@ Every agent **must** write to the shared audit log per `.team/protocols/audit.md
 - Never modify existing entries — the log is append-only
 
 See `.team/protocols/audit.md` for the full event schema and required entries by task size.
+
+### Audit Enforcement
+
+Audit compliance is non-negotiable:
+- The `auditor` agent reviews completed sessions against the audit log
+- Missing audit entries are flagged as protocol violations
+- The `.team/audit/sessions/` directory stores per-session audit files
+- The `.team/audit/index.md` tracks all audit sessions with summaries
+- The Tech Lead factors audit compliance into agent probation decisions
 
 ## Collaboration Protocol
 

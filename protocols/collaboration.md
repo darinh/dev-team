@@ -64,6 +64,40 @@ Spawn depth is self-enforced via the `Spawn depth: N` marker in every spawn prom
 3. At depth 3, the agent MUST NOT spawn. It solves the problem itself or returns with a clear explanation.
 4. If a spawn prompt arrives WITHOUT a depth marker, treat it as depth 1 (assume the user or entry point spawned you).
 
+## Delegation Rules
+
+### Implementation Work Routing
+- Implementation work MUST go to specialist agents, NEVER to Project Manager
+- Project Manager decomposes work into tasks and identifies which specialist handles each
+- If no specialist exists for a task, escalate to dev-team → Hiring Manager creates one
+- dev-team NEVER falls back to `general-purpose` agents when a template exists
+
+### Specialist Creation Before Work
+When dev-team receives implementation work:
+1. Check org-chart for matching specialist
+2. If none exists → invoke Hiring Manager with the template
+3. Hiring Manager creates `.github/agents/{name}.agent.md` from `templates/{name}.template.md`
+4. Updates org-chart with new agent
+5. THEN route work to the new specialist
+
+### Enforcement Rules
+
+These rules are enforced by dev-team and are non-negotiable:
+
+1. **Implementation work MUST go to specialist agents, NEVER to the Project Manager.** PM plans, decomposes, and gathers requirements. Specialists write code, fix bugs, and implement features. If dev-team routes implementation to PM, PM must refuse and redirect.
+
+2. **If no specialist exists for the required domain, the Hiring Manager must create one BEFORE implementation begins.** Never start coding without the right specialist. The Hiring Manager can create specialists from templates in minutes.
+
+3. **dev-team is responsible for enforcing these routing rules.** dev-team checks the org chart before routing and invokes the Hiring Manager when specialists are missing.
+
+### Handoff Requirements
+Every agent completing implementation work MUST:
+1. Run build command and report exit code
+2. Run test command and report exit code + summary
+3. List files modified
+4. Write handoff audit entry
+5. Write OUTCOME in memory file
+
 ## Structured Handoff Schema
 
 When passing work between agents, use this required format in your spawn prompt. This prevents context loss and ensures the receiving agent can independently verify claims.

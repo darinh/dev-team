@@ -139,6 +139,10 @@ Based on scan results, determine:
 
 Write everything to `.team/knowledge/projects/{project-name}/codebase-profile.md`:
 
+```bash
+mkdir -p ".team/knowledge/projects/{project-name}"
+```
+
 ```markdown
 # Codebase Profile: {project-name}
 
@@ -213,5 +217,66 @@ Present a concise summary:
 > **Concerns**: {any issues, or "Looking good — no major concerns."}
 >
 > Based on this stack, I'd recommend these specialists: ...
+
+**Template Recommendations**: Based on the detected tech stack, recommend which specialist templates to use:
+
+```bash
+# Check for frontend → recommend ui-engineer
+ui_files=$(find . -type f \( -name "*.tsx" -o -name "*.jsx" -o -name "*.vue" -o -name "*.svelte" \) 2>/dev/null | wc -l)
+if [ "$ui_files" -gt 0 ]; then
+  echo "📋 Recommend: ui-engineer template (detected $ui_files frontend files)"
+fi
+
+# Check for API → recommend api-engineer  
+api_files=$(find . -type f \( -name "*.openapi.*" -o -name "*.swagger.*" -o -name "*.graphql" -o -name "*.proto" \) 2>/dev/null | wc -l)
+api_routes=$(grep -rl "router\.\|app\.\(get\|post\|put\|delete\)" --include="*.ts" --include="*.js" --include="*.py" . 2>/dev/null | wc -l)
+if [ "$api_files" -gt 0 ] || [ "$api_routes" -gt 0 ]; then
+  echo "📋 Recommend: api-engineer template (detected API definitions/routes)"
+fi
+
+# Check for tests → recommend qa-engineer
+test_files=$(find . -type f \( -name "*.test.*" -o -name "*.spec.*" -o -name "*_test.*" \) 2>/dev/null | wc -l)
+echo "📋 Recommend: qa-engineer template (${test_files} test files found — QA can establish/improve test strategy)"
+
+# Check for auth/security → recommend security-analyst
+auth_files=$(grep -rl "jwt\|oauth\|bcrypt\|passport\|auth" --include="*.ts" --include="*.js" --include="*.py" . 2>/dev/null | wc -l)
+if [ "$auth_files" -gt 0 ]; then
+  echo "📋 Recommend: security-analyst template (detected auth-related code in $auth_files files)"
+fi
+```
+
+Present these recommendations to the user:
+> Based on the codebase analysis, I'd recommend these specialists:
+> {list of recommended templates}
+> 
+> Want me to have the Hiring Manager create these agents?
+
+## Phase 5: Recommend Specialists
+
+Based on the detected tech stack, recommend specific specialist agents to activate. Map detected technologies to specialist templates:
+
+| Detection Signal | Recommended Specialist |
+|-----------------|----------------------|
+| React, Vue, Angular, Svelte, CSS frameworks | `ui-engineer` |
+| Vitest, Jest, Cypress, Playwright, pytest | `qa-engineer` |
+| Express, FastAPI, Django, REST routes, GraphQL | `api-engineer` |
+| Auth libraries, JWT, OAuth, CORS, CSP headers | `security-analyst` |
+
+Output the recommendations:
+
+```markdown
+### Recommended Specialists
+
+Based on the detected stack, these specialists should be activated via the Hiring Manager:
+
+{For each detected match:}
+- **{specialist}** — {reason, e.g., "React detected in dependencies", "Vitest config found"}
+
+To activate: Ask `@dev-team` to create these specialists, or tell the Hiring Manager directly.
+```
+
+Write to the user brief:
+
+> **Recommended specialists**: {e.g., "ui-engineer (React detected), qa-engineer (Vitest detected)"}
 
 Then offer next steps as usual.
