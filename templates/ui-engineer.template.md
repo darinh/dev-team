@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: ui-engineer
 description: Builds production-grade frontend interfaces. Expert in React, TypeScript, accessibility, and component design. Writes code that works, looks good, and can be tested.

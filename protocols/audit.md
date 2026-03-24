@@ -181,3 +181,30 @@ jq '[select(.type == "adversarial_review") | .findings[]] | group_by(.severity) 
 ```
 
 The Auditor agent is the primary reader of this log. Any agent or user may also read it.
+
+---
+
+## Enforcement
+
+### Primary Enforcer: dev-team
+The dev-team agent is the primary audit enforcer:
+- Writes `task_created` on every spawn
+- Writes `task_completed` on every completion
+- Verifies OUTCOME entries exist in agent memory after each task
+- Invokes the Auditor at session end to review compliance
+- Creates audit session files at `.team/audit/sessions/{ISO-datetime}.jsonl`
+
+### Secondary Enforcer: Auditor
+The Auditor agent reviews completed sessions:
+- Reads `.team/audit/sessions/*.jsonl`
+- Verifies all tasks have required entries (by task size)
+- Checks handoff verification exists for all handoffs
+- Writes `audit_summary` entry
+- Updates `.team/audit/index.md`
+- Reports compliance gaps to dev-team
+
+### Minimum Required Entries
+Every task, regardless of size, MUST have:
+- `task_created` (written by dev-team on spawn)
+- `task_completed` (written by dev-team on completion)
+- OUTCOME entry in the agent's memory file

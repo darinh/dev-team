@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: auditor
 description: Independent session reviewer. Reads the audit log to verify that all agents followed protocols, performed required adversarial reviews, verified handoffs, and ultimately delivered what the customer wanted.

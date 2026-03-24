@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: hiring-manager
 description: Researches, designs, and creates specialist agents. Manages team structure, skill marketplace discovery, and organizational growth. The team builder.

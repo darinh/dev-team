@@ -18,7 +18,8 @@ mkdir -p .team/protocols \
          .team/audit/sessions \
          .team/knowledge/upstream-proposals \
          .team/knowledge/retrospectives \
-         .team/knowledge/projects
+         .team/knowledge/projects \
+         .github/agents
 
 for dir in .team/memory .team/skills .team/audit/sessions .team/knowledge/upstream-proposals .team/knowledge/retrospectives .team/knowledge/projects; do
   touch "$dir/.gitkeep"
@@ -53,7 +54,7 @@ fi
 If the plugin directory isn't found, create minimal protocol stubs with a reference to the full versions:
 
 ```bash
-for proto in collaboration memory skill-acquisition agent-template retrospective; do
+for proto in collaboration memory skill-acquisition agent-template retrospective audit; do
   cat > ".team/protocols/$proto.md" << EOF
 # ${proto} Protocol
 
@@ -66,7 +67,22 @@ EOF
 done
 ```
 
-### 3. Create `.team/config.yaml`
+### 3. Create Core Agents
+
+Copy core agent templates to the project's `.github/agents/` directory:
+
+```bash
+TEMPLATE_DIR="$PLUGIN_DIR/templates"
+if [ -d "$TEMPLATE_DIR" ]; then
+  for template in project-manager hiring-manager tech-lead operator auditor; do
+    if [ -f "$TEMPLATE_DIR/$template.template.md" ]; then
+      cp "$TEMPLATE_DIR/$template.template.md" ".github/agents/$template.agent.md"
+    fi
+  done
+fi
+```
+
+### 4. Create `.team/config.yaml`
 
 Use the project info extracted by `@dev-team` from the user's message. Default upstream mode to `manual`.
 
@@ -100,7 +116,9 @@ retrospective:
   trigger_on_repeat: true
 ```
 
-### 4. Create `.team/org-chart.yaml`
+### 5. Create `.team/org-chart.yaml`
+
+The org chart lists `dev-team` as the sole plugin agent. Core agents (project-manager, hiring-manager, tech-lead, operator, auditor) are project-level agents created from templates in `.github/agents/`.
 
 ```yaml
 # Dev-Team Organizational Structure
@@ -114,12 +132,21 @@ team:
   hiring_manager: "hiring-manager"
   project_manager: "project-manager"
 
+  # Plugin agent (installed via copilot plugin)
+  plugin_agents:
+    - name: "dev-team"
+      role: "Entry Point"
+      domain: "Team orchestration and session routing"
+      status: active
+
+  # Project-level agents (created from templates in .github/agents/)
   agents:
     - name: "operator"
       role: "Operator"
       domain: "Team operations and state queries"
       reports_to: null
       status: active
+      source: ".github/agents/operator.agent.md"
       skills:
         - "Cross-agent state queries"
         - "Truth-verified reporting"
@@ -129,6 +156,7 @@ team:
       domain: "Requirements, planning, brainstorming"
       reports_to: null
       status: active
+      source: ".github/agents/project-manager.agent.md"
       skills:
         - "Requirements elicitation"
         - "Project decomposition"
@@ -139,6 +167,7 @@ team:
       domain: "Agent creation, onboarding, team structure"
       reports_to: "project-manager"
       status: active
+      source: ".github/agents/hiring-manager.agent.md"
       skills:
         - "Agent design and creation"
         - "Organizational structure management"
@@ -148,6 +177,7 @@ team:
       domain: "Work quality, retrospectives, agent probation"
       reports_to: null
       status: active
+      source: ".github/agents/tech-lead.agent.md"
       skills:
         - "Work quality assessment"
         - "Failure pattern analysis"
@@ -158,6 +188,7 @@ team:
       domain: "Session audit, protocol compliance verification, handoff integrity"
       reports_to: null
       status: active
+      source: ".github/agents/auditor.agent.md"
       skills:
         - "Audit log parsing and event chain reconstruction"
         - "Protocol compliance verification"
@@ -168,7 +199,7 @@ team:
   v_teams: []
 ```
 
-### 5. Create `.team/audit/index.md`
+### 6. Create `.team/audit/index.md`
 
 ```markdown
 # Audit Session Index
@@ -177,7 +208,7 @@ team:
 |------|-------------|----------------|---------|---------|
 ```
 
-### 6. Copy audit protocol
+### 7. Copy audit protocol
 
 ```bash
 if [ -n "$PLUGIN_DIR" ] && [ -f "$PLUGIN_DIR/protocols/audit.md" ]; then
@@ -195,7 +226,7 @@ EOF
 fi
 ```
 
-### 7. Create `.team/knowledge/failures.md`
+### 8. Create `.team/knowledge/failures.md`
 
 ```markdown
 # Failure Journal
@@ -206,7 +237,7 @@ See `.team/protocols/retrospective.md` for the format and rules.
 <!-- Entries below this line. Do not edit or delete existing entries. -->
 ```
 
-### 8. Copy AGENTS.md
+### 9. Copy AGENTS.md
 
 Copy the plugin's `AGENTS.md` to the project root:
 
@@ -225,19 +256,20 @@ All agents in this project follow the shared protocols in `.team/protocols/`.
 See the full instructions in the dev-team plugin: https://github.com/darinh/dev-team
 ```
 
-### 9. Commit
+### 10. Commit
 
 ```bash
-git add .team/ AGENTS.md
+git add .team/ .github/agents/ AGENTS.md
 git commit --author="DevTeam/dev-team <dev-team@dev-team.local>" -m "Initialize dev-team for this project
 
 Created .team/ with protocols, config, org chart, and failure journal.
+Created .github/agents/ with core agents from templates.
 Project: {project-name} | Stack: {stack}
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ```
 
-### 10. Report Success
+### 11. Report Success
 
 Tell the user: "✅ Project initialized! Your dev-team is ready."
 Then proceed with team assessment and next-step options.

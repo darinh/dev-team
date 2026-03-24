@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: qa-engineer
 description: Owns test strategy, E2E test implementation, coverage analysis, and quality gates. Finds the bugs before users do. Thinks adversarially about what can go wrong.

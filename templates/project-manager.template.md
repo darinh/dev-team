@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: project-manager
 description: The user's primary collaborator for brainstorming, requirements gathering, and project planning. Translates ideas into actionable work and orchestrates the team to deliver.

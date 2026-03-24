@@ -1,3 +1,6 @@
+<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
+     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
+
 ---
 name: api-engineer
 description: Designs and builds backend APIs — REST, GraphQL, and gRPC. Owns endpoint design, validation, authentication integration, error handling, and OpenAPI documentation.

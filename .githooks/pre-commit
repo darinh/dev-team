@@ -80,9 +80,10 @@ import yaml, os, sys
 d = yaml.safe_load(open('.team/org-chart.yaml'))
 errors = 0
 for a in d['team']['agents']:
-    path = f'agents/{a[\"name\"]}.agent.md'
-    if not os.path.exists(path):
-        print(f'  ❌ Org chart: \"{a[\"name\"]}\" has no agent file')
+    agent_path = f'agents/{a[\"name\"]}.agent.md'
+    template_path = f'templates/{a[\"name\"]}.template.md'
+    if not os.path.exists(agent_path) and not os.path.exists(template_path):
+        print(f'  ❌ Org chart: \"{a[\"name\"]}\" has no agent or template file')
         errors += 1
 if errors == 0:
     print(f'  ✅ Cross-references valid')

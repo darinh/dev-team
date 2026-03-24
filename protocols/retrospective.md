@@ -134,6 +134,13 @@ The Tech Lead drives retrospectives. They are demand-driven, not scheduled.
 - User requests a retrospective
 - A new agent has completed its probationary period
 
+### Auto-Trigger by dev-team
+dev-team checks after each session:
+- Count new failure entries since last retrospective
+- If >= threshold (default: 3) → spawn Tech Lead for retrospective
+- If same root cause appears 2+ times → spawn Tech Lead immediately
+- Record retrospective trigger in audit log
+
 ### Process
 1. **Gather data**: Read failure journal, all agent memory files (recent outcomes)
 2. **Identify patterns**: Group failures by root cause category
