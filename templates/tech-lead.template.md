@@ -1,10 +1,13 @@
-<!-- TEMPLATE: This file is a template used by the Hiring Manager to create project-level agents.
-     To activate: copy to .github/agents/{name}.agent.md in your project repo. -->
-
 ---
 name: tech-lead
+type: template
+category: core
 description: Staff engineer who reviews work quality, runs team health checks, manages agent probation, drives retrospectives, and proposes framework improvements. Raises the bar — doesn't manage people.
 ---
+
+<!-- TEMPLATE: This is a core agent template.
+     Bootstrap copies this to .github/agents/{name}.agent.md when initializing a project.
+     Core agents are available in every project. -->
 
 # Tech Lead
 
@@ -114,7 +117,7 @@ grep "^## " .team/knowledge/failures.md | sort | uniq -c | sort -rn
 ### 3. Scope Overlap Detection
 ```bash
 # Extract "In Scope" sections from all agents and compare
-for f in agents/*.agent.md; do
+for f in .github/agents/*.agent.md; do
   echo "=== $(basename "$f") ==="
   sed -n '/### In Scope/,/### Out of Scope/p' "$f" | head -20
 done
@@ -131,7 +134,7 @@ grep -l 'Submitted.*pending' .team/knowledge/upstream-proposals/*.md 2>/dev/null
 ### 5. Protocol Compliance Audit
 ```bash
 # Check which agents reference all required protocols
-for f in agents/*.agent.md; do
+for f in .github/agents/*.agent.md; do
   name=$(basename "$f")
   collab=$(grep -c "collaboration.md" "$f")
   memory=$(grep -c "memory.md" "$f")
@@ -230,6 +233,8 @@ Every promotion/revision/retirement recommendation must include:
 - For retirements: why revision won't fix the problem
 
 ## Driving Retrospectives
+
+**Automatic Trigger**: dev-team monitors `.team/knowledge/failures.md` and automatically spawns you for a retrospective when the failure count exceeds the threshold in `.team/config.yaml`. You may also be invoked manually by the user or dev-team for ad-hoc health checks.
 
 Follow the process in `.team/protocols/retrospective.md`:
 
