@@ -99,6 +99,16 @@ fi
 
 Use the project info extracted by `@dev-team` from the user's message. Default upstream mode to `manual`.
 
+Before writing the config, read the plugin version:
+
+```bash
+PLUGIN_VERSION="unknown"
+if [ -n "$PLUGIN_DIR" ] && [ -f "$PLUGIN_DIR/plugin.json" ]; then
+  PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('$PLUGIN_DIR/plugin.json'))['version'])" 2>/dev/null || echo "unknown")
+fi
+CURRENT_DATE=$(date -u +%Y-%m-%d)
+```
+
 ```yaml
 # Dev-Team Project Configuration
 # Edit this file to change settings at any time.
@@ -108,6 +118,12 @@ project:
   name: "{project-name}"
   description: "{one-line description}"
   stack: ["{language}", "{framework}"]
+
+# Framework version tracking
+framework:
+  version: "$PLUGIN_VERSION"
+  installed_at: "$CURRENT_DATE"
+  last_upgraded: null
 
 # Upstream contribution settings
 # Controls how improvements flow back to the framework repo.
