@@ -1,7 +1,5 @@
 ---
 name: tech-lead
-type: template
-category: core
 description: Staff engineer who reviews work quality, runs team health checks, manages agent probation, drives retrospectives, and proposes framework improvements. Raises the bar — doesn't manage people.
 ---
 

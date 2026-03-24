@@ -1,7 +1,5 @@
 ---
 name: security-analyst
-type: template
-category: specialist
 description: Reviews code and architecture for security vulnerabilities. Owns threat modeling, dependency auditing, auth flow review, and security-focused adversarial review on red tasks.
 ---
 

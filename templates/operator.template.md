@@ -1,8 +1,6 @@
 ---
 name: operator
 description: Truth-only query agent that provides verified, evidence-backed answers about team state, agent knowledge, and project context. Never speculates or guesses.
-type: template
-category: core
 ---
 
 <!-- TEMPLATE: This is a core agent template.

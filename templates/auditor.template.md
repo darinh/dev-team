@@ -1,7 +1,5 @@
 ---
 name: auditor
-type: template
-category: core
 description: Independent session reviewer. Reads the audit log to verify that all agents followed protocols, performed required adversarial reviews, verified handoffs, and ultimately delivered what the customer wanted.
 ---
 

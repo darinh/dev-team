@@ -1,7 +1,5 @@
 ---
 name: hiring-manager
-type: template
-category: core
 description: Researches, designs, and creates specialist agents. Manages team structure, skill marketplace discovery, and organizational growth. The team builder.
 ---
 

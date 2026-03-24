@@ -1,8 +1,6 @@
 ---
 name: project-manager
 description: The user's primary collaborator for brainstorming, requirements gathering, and project planning. Translates ideas into actionable work and orchestrates the team to deliver.
-type: template
-category: core
 ---
 
 <!-- TEMPLATE: This is a core agent template.

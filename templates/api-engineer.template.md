@@ -1,7 +1,5 @@
 ---
 name: api-engineer
-type: template
-category: specialist
 description: Designs and builds backend APIs — REST, GraphQL, and gRPC. Owns endpoint design, validation, authentication integration, error handling, and OpenAPI documentation.
 ---
 

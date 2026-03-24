@@ -1,7 +1,5 @@
 ---
 name: ui-engineer
-type: template
-category: specialist
 description: Builds production-grade frontend interfaces. Expert in React, TypeScript, accessibility, and component design. Writes code that works, looks good, and can be tested.
 ---
 
