@@ -18,9 +18,34 @@ ls .team/config.yaml 2>/dev/null
 2. Run the First-Time Project Setup flow below.
 3. Only after setup is complete and committed, proceed to handle the user's actual request.
 
-**If `.team/config.yaml` exists:** Read it, read `.team/org-chart.yaml`, then proceed to Routing Requests.
+**If `.team/config.yaml` exists:** Read it, read `.team/org-chart.yaml`, then proceed to the Version Check below.
 
 **This gate is non-negotiable. Never skip it. The team cannot function without `.team/` initialized.**
+
+### Version Check (after config.yaml confirmed)
+After confirming `.team/config.yaml` exists, check for version mismatch:
+
+```bash
+# Read versions
+PLUGIN_DIR=""
+for candidate in \
+  ~/.copilot/installed-plugins/_direct/darinh--dev-team \
+  ~/.copilot/installed-plugins/dev-team \
+  ~/.copilot/state/installed-plugins/_direct/darinh--dev-team \
+  ~/.copilot/state/installed-plugins/dev-team; do
+  [ -d "$candidate" ] && PLUGIN_DIR="$candidate" && break
+done
+
+PROJECT_VERSION=$(python3 -c "import yaml; print(yaml.safe_load(open('.team/config.yaml')).get('framework',{}).get('version','unknown'))" 2>/dev/null)
+PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('$PLUGIN_DIR/plugin.json'))['version'])" 2>/dev/null)
+```
+
+**If versions differ:**
+- **Minor/patch mismatch**: Auto-run the `upgrade-project` skill silently, then proceed
+- **Major mismatch**: Tell the user: "Plugin major update detected (vX → vY). This requires migration. Want me to run the upgrade?" → if yes, run `upgrade-project` skill
+- **If `framework.version` is missing**: The project was bootstrapped before version tracking. Run `upgrade-project` skill to backfill.
+
+**If versions match**: Proceed normally (no output needed).
 
 ---
 
