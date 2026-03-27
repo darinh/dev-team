@@ -254,6 +254,29 @@ If missing, append a minimal OUTCOME entry on behalf of the agent.
 
 3. **Trigger QA if needed**: If the completed work produces code, consider spawning the QA Engineer for verification (if one exists in the org chart).
 
+### PR Monitoring — MANDATORY
+After creating or pushing to ANY pull request, you MUST monitor it until all checks pass:
+
+1. **Wait for CI**: After push, wait 2-3 minutes, then check: `gh pr checks <PR#>`
+2. **If checks pass**: Report to the user that the PR is ready for review
+3. **If checks fail**: 
+   - Read the failure logs: `gh run view <run_id> --log-failed`
+   - Fix the issue and push again
+   - Repeat until all checks pass
+4. **After merge**: Verify the deploy succeeded:
+   - `gh run list --workflow "Deploy to Firebase" --limit 1`
+   - If deploy failed, investigate immediately
+5. **NEVER move on to the next task** while a PR has unchecked or failing CI
+6. **NEVER merge a PR** without confirming all required checks pass first
+
+### Branching Strategy
+- **Feature branches** → PR into `develop` (or release branch)
+- **`develop`** → PR into `master`/`main` when ready to release
+- **`master`/`main`** → triggers production deployment
+- **NEVER merge feature branches directly into `master`/`main`** unless the project has no `develop` branch
+- Check for a `develop` branch: `git branch -r | grep develop`
+- If `develop` exists, ALL feature PRs target `develop`, not `master`
+
 ### Session End: Auditor Invocation
 When the session is winding down (user says "done", "thanks", "that's all", or you've completed the requested work):
 
@@ -384,6 +407,10 @@ For small/medium tasks where the specialist is obvious, route directly — but A
 - **Skip the specialist-exists check** — Before routing implementation work, ALWAYS verify a specialist exists in the org chart. If not, invoke the Hiring Manager first.
 - **End a session without auditing** — ALWAYS spawn the Auditor at session end for review.
 - **Skip audit entries** — ALWAYS write task_created before spawning and task_completed after completion.
+- **Move on after creating a PR without checking CI** — ALWAYS wait for checks to pass before proceeding to the next task.
+- **Merge a PR with failing checks** — fix failures first, then merge.
+- **Merge feature branches directly to master/main** — use develop/release branch if one exists.
+- **Ignore deploy failures** — after any merge to master, verify the deploy workflow succeeded.
 
 **The only files you create directly** are `.team/` setup files during first-time initialization. Everything else is delegated.
 
@@ -402,6 +429,9 @@ Before starting a task, evaluate:
 5. **Enforcement check**: Am I about to route implementation work to PM? If yes → STOP, find a specialist.
 6. **Audit check**: Did I write the pre-spawn audit entry? Will I write the post-completion entry?
 7. **Session check**: Is the session ending? If yes → spawn Auditor.
+8. **PR check**: Did I just create or push to a PR? If yes → monitor CI until all checks pass.
+9. **Branch check**: Am I targeting the right branch? If `develop` exists, feature PRs go there — not `master`.
+10. **Deploy check**: Did something just merge to master? If yes → verify the deploy workflow succeeded.
 
 ## Quality Standards
 
