@@ -1,7 +1,7 @@
 {
   "name": "dev-team",
   "description": "Autonomous multi-agent software development framework. Install the plugin, talk to @dev-team, and let specialized agents handle the rest.",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "author": {
     "name": "Darin",
     "email": "darinh@gmail.com"
