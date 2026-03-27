@@ -32,23 +32,34 @@ jobs:
 
           echo "current_version=${LATEST_TAG#v}" >> "$GITHUB_OUTPUT"
 
-          # Collect commit messages (subject + body)
-          COMMITS=$(git log "$RANGE" --pretty=format:'%B---END_COMMIT---')
+          # Get commit subjects (one per line, skip merge commits)
+          SUBJECTS=$(git log "$RANGE" --no-merges --pretty=format:'%s')
 
-          if [ -z "$COMMITS" ]; then
+          if [ -z "$SUBJECTS" ]; then
             echo "No commits found since $LATEST_TAG"
             echo "bump_type=none" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          echo "Commits since $LATEST_TAG:"
+          echo "$SUBJECTS"
+
+          # Also check full commit bodies for BREAKING CHANGE
+          BODIES=$(git log "$RANGE" --no-merges --pretty=format:'%B---END---')
+
           BUMP="none"
 
-          while IFS= read -r -d '' COMMIT; do
-            SUBJECT=$(echo "$COMMIT" | head -n1)
+          # Check for breaking changes in bodies
+          if echo "$BODIES" | grep -qE '^BREAKING CHANGE:'; then
+            BUMP="major"
+          fi
 
-            # Check for BREAKING CHANGE in body/footer or ! after type
-            if echo "$COMMIT" | grep -qE '^BREAKING CHANGE:' || \
-               echo "$SUBJECT" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+          # Scan each subject line
+          while IFS= read -r SUBJECT; do
+            [ -z "$SUBJECT" ] && continue
+
+            # Check for ! (breaking) in subject
+            if echo "$SUBJECT" | grep -qE '^[a-z]+(\(.+\))?!:'; then
               BUMP="major"
               break
             fi
@@ -66,7 +77,7 @@ jobs:
                 BUMP="patch"
               fi
             fi
-          done < <(echo "$COMMITS" | sed 's/---END_COMMIT---/\x00/g')
+          done <<< "$SUBJECTS"
 
           echo "Bump type: $BUMP"
           echo "bump_type=$BUMP" >> "$GITHUB_OUTPUT"
